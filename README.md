@@ -1,2 +1,4 @@
 # mame-chessengine
-MAME Chess UCI/XBoard Interface plugin
+A MAME Lua plugin for interface emulated chess machine with UCI/XBoard GUI
+
+Requires MAME >= 0.183

@@ -1,0 +1,10 @@
+{
+  "plugin": {
+	"name": "chessengine",
+	"description": "Chess UCI/XBoard Interface plugin",
+	"version": "0.0.1",
+	"author": "Sandro Ronco",
+	"type": "plugin",
+	"start": "false"
+  }
+}
