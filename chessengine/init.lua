@@ -62,7 +62,7 @@ local function move_to_pos(move)
 	return {x = x, y = y}
 end
 
-local function promote_pawn(pos, piece)
+local function promote_pawn(pos, piece, promotion)
 	local sign = 1
 	if board[pos.y][pos.x] < 0 then
 		sign = -1
@@ -74,7 +74,7 @@ local function promote_pawn(pos, piece)
 	elseif (piece == "n") then	board[pos.y][pos.x] = board[pos.y][pos.x] - (1 * sign)
 	end
 
-	if interface.promote then
+	if promotion and interface.promote then
 		emu.wait(0.5)
 		interface.promote(piece.x, piece.y, piece)
 	end
@@ -101,7 +101,7 @@ local function send_cmd(cmd)
 	io.stdout:flush()
 end
 
-local function make_move(move, reason)
+local function make_move(move, reason, promotion)
 	local from = move_to_pos(move:sub(1, 2))
 	local to = move_to_pos(move:sub(3, 4))
 
@@ -123,10 +123,10 @@ local function make_move(move, reason)
 	sel_started = false
 
 	-- castling
-	if     (board[from.y][from.x] ==  1 and move == "e1g1") then make_move("h1f1", "_castling")
-	elseif (board[from.y][from.x] ==  1 and move == "e1c1") then make_move("a1d1", "_castling")
-	elseif (board[from.y][from.x] == -1 and move == "e8g8") then make_move("h8f8", "_castling")
-	elseif (board[from.y][from.x] == -1 and move == "e8c8") then make_move("a8d8", "_castling")
+	if     (board[from.y][from.x] ==  1 and move == "e1g1") then make_move("h1f1", "_castling", false)
+	elseif (board[from.y][from.x] ==  1 and move == "e1c1") then make_move("a1d1", "_castling", false)
+	elseif (board[from.y][from.x] == -1 and move == "e8g8") then make_move("h8f8", "_castling", false)
+	elseif (board[from.y][from.x] == -1 and move == "e8c8") then make_move("a8d8", "_castling", false)
 	else
 		-- next ply
 		if (ply == "W") then
@@ -156,7 +156,7 @@ local function make_move(move, reason)
 
 	-- promotion
 	if (move:len() >= 5) then
-		promote_pawn(to, move:sub(move:len()))
+		promote_pawn(to, move:sub(move:len()), promotion)
 	end
 end
 
@@ -220,7 +220,7 @@ local function search_selected_piece()
 			send_cmd("bestmove " .. move)
 		end
 
-		make_move(move, "")
+		make_move(move, "", false)
 	end
 end
 
@@ -254,7 +254,7 @@ local function execute_uci_command(cmd)
 		for i in string.gmatch(cmd, "%S+") do
 			last_move = i
 		end
-		make_move(last_move, "")
+		make_move(last_move, "", true)
 		piece_from = nil
 		piece_to = nil
 	else
@@ -295,7 +295,7 @@ local function execute_xboard_command(cmd)
 		manager:machine():exit()
 	elseif cmd:match("^[abcdefgh][12345678][abcdefgh][12345678]") ~= nil then
 		game_started = true
-		make_move(cmd, "")
+		make_move(cmd, "", true)
 		piece_from = nil
 		piece_to = nil
 		sel_started = false
