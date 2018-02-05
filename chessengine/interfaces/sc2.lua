@@ -7,6 +7,8 @@ local turn = true
 local invert = false
 
 function interface.setup_machine()
+	turn = true
+	invert = false
 	emu.wait(1.0)
 end
 
@@ -59,6 +61,23 @@ function interface.select_piece(x, y, event)
 			end
 			turn = not turn
 		end
+	end
+end
+
+function interface.get_options()
+	return { { "spin", "Level", "1", "1", "10"}, }
+end
+
+function interface.set_option(name, value)
+	if (name == "level") then
+		local level = tonumber(value)
+		if (level < 1 or level > 10) then
+			return
+		end
+		local lcd_num = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67, 0x3f }
+		repeat
+			send_input(":LINE4", 0x10, 0.5)
+		until machine:outputs():get_value("digit3") == lcd_num[level]
 	end
 end
 

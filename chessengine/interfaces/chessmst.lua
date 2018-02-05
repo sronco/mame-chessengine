@@ -22,6 +22,21 @@ function interface.select_piece(x, y, event)
 	send_input(":COL_" .. port_tags[x], 1 << (y - 1), 1)
 end
 
+function interface.get_options()
+	return { { "spin", "Level", "1", "1", "8"}, }
+end
+
+function interface.set_option(name, value)
+	if (name == "level") then
+		local level = tonumber(value)
+		if (level < 1 or level > 8) then
+			return
+		end
+		send_input(":BUTTONS", 0x40, 1)
+		send_input(":BUTTONS", 0x80 >> (level - 1), 1)
+	end
+end
+
 function interface.get_promotion()
 	return 'q'	-- TODO
 end

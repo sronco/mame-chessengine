@@ -4,6 +4,7 @@
 interface = {}
 
 function interface.setup_machine()
+	emu.wait(1.0)
 end
 
 function interface.start_play()
@@ -15,7 +16,9 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	send_input(":IN." .. tostring(8 - y), 1 << (8 - x), 1)
+	if (event ~= "capture") then
+		send_input(":IN." .. tostring(8 - y), 1 << (8 - x), 1)
+	end
 end
 
 function interface.get_promotion()

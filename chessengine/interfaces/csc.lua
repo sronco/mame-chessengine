@@ -23,11 +23,29 @@ function interface.select_piece(x, y, event)
 	end
 end
 
+function interface.get_options()
+	return { { "spin", "Level", "1", "1", "12"}, }
+end
+
+function interface.set_option(name, value)
+	if (name == "level") then
+		local level = tonumber(value)
+		if (level < 1 or level > 12) then
+			return
+		end
+		local lcd_num = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x79, 0x71, 0x3d, 0x76 }
+		repeat
+			send_input(":IN.3", 0x100, 0.5)
+		until machine:outputs():get_value("digit0") == lcd_num[level]
+	end
+end
+
 function interface.get_promotion()
 	return 'q'	-- TODO
 end
 
 function interface.promote(x, y, piece)
+	emu.wait(1.0)
 	if     (piece == "q") then	send_input(":IN.8", 0x10, 1)
 	elseif (piece == "r") then	send_input(":IN.8", 0x02, 1)
 	elseif (piece == "b") then	send_input(":IN.8", 0x08, 1)

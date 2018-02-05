@@ -17,11 +17,31 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	send_input(":IN." .. tostring(8 - y), 1 << (8 - x), 1)
+	if (event ~= "capture") then
+		send_input(":IN." .. tostring(8 - y), 1 << (8 - x), 1)
+	end
+end
+
+function interface.get_promotion_led()
+	if     (machine:outputs():get_value("0.1") ~= 0) then	return 'q'
+	elseif (machine:outputs():get_value("0.4") ~= 0) then	return 'r'
+	elseif (machine:outputs():get_value("0.2") ~= 0) then	return 'b'
+	elseif (machine:outputs():get_value("0.3") ~= 0) then	return 'n'
+	end
+	return nil
 end
 
 function interface.get_promotion()
-	return 'q'	-- TODO
+	-- try a couple of times because the LEDs flashes
+	for i=1,5 do
+		local p = interface.get_promotion_led()
+		if (p ~= nil) then
+			return p
+		end
+		emu.wait(0.25)
+	end
+
+	return nil
 end
 
 function interface.promote(x, y, piece)

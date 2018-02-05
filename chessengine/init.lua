@@ -37,6 +37,7 @@ local function board_reset()
 	game_started = false
 	piece_get = false
 	sel_started = false
+	my_color = "B"
 	ply = "W"
 	piece_from = nil
 	piece_to = nil
@@ -74,9 +75,13 @@ local function promote_pawn(pos, piece, promotion)
 	elseif (piece == "n") then	board[pos.y][pos.x] = board[pos.y][pos.x] - (1 * sign)
 	end
 
-	if promotion and interface.promote then
+	if interface.promote then
 		emu.wait(0.5)
-		interface.promote(piece.x, piece.y, piece)
+		if promotion then
+			interface.promote(pos.x, pos.y, string.lower(piece))
+		else
+			interface.promote(pos.x, pos.y, string.upper(piece))
+		end
 	end
 end
 
@@ -89,9 +94,7 @@ end
 
 local function recv_cmd()
 	if conth.yield then
-		local result = conth.result
-		conth:continue("")
-		return result
+		return conth.result
 	end
 	return nil
 end
@@ -99,6 +102,14 @@ end
 local function send_cmd(cmd)
 	io.stdout:write(cmd .. "\n")
 	io.stdout:flush()
+end
+
+local function send_move(move)
+	if (protocol == "xboard") then
+		send_cmd("move " .. move)
+	elseif (protocol == "uci") then
+		send_cmd("bestmove " .. move)
+	end
 end
 
 local function make_move(move, reason, promotion)
@@ -163,15 +174,24 @@ end
 local function search_selected_piece()
 	local active_fpos = 0
 	local active_tpos = 0
-	for y=1,8 do
-		for x=1,8 do
-			if interface.is_selected and interface.is_selected(x, y) then
-				if piece_from ~= nil and (board[y][x] == 0 or (board[y][x] < 0 and ply == "W") or (board[y][x] > 0 and ply == "B")) then
-					piece_to = {x = x, y = y}
-					active_tpos = active_tpos + 1
-				elseif (board[y][x] < 0 and ply == "B") or (board[y][x] > 0 and ply == "W") then
+	local board_sel = {}
+	if (interface.is_selected) then
+		for y=1,8 do
+			for x=1,8 do
+				board_sel[y*8 + x] = interface.is_selected(x, y)
+				if board_sel[y*8 + x] and ((board[y][x] < 0 and ply == "B") or (board[y][x] > 0 and ply == "W")) then
 					piece_from = {x = x, y = y}
 					active_fpos = active_fpos + 1
+				end
+			end
+		end
+		if (piece_from ~= nil) then
+			for y=1,8 do
+				for x=1,8 do
+					if board_sel[y*8 + x] and (board[y][x] == 0 or (board[y][x] < 0 and ply == "W") or (board[y][x] > 0 and ply == "B")) then
+						piece_to = {x = x, y = y}
+						active_tpos = active_tpos + 1
+					end
 				end
 			end
 		end
@@ -191,7 +211,7 @@ local function search_selected_piece()
 		piece_to = nil
 	end
 
-	if not piece_get and piece_from ~= nil then
+	if not piece_get and piece_from ~= nil and piece_to == nil then
 		piece_get = true
 		if interface.select_piece then
 			interface.select_piece(piece_from.x, piece_from.y, "get")
@@ -203,40 +223,119 @@ local function search_selected_piece()
 		local rows = { "a", "b", "c", "d", "e", "f", "g", "h" }
 		local move = rows[piece_from.x] .. tostring(piece_from.y)
 		move = move .. rows[piece_to.x] .. tostring(piece_to.y)
+		local need_promotion = (piece_to.y == 8 and board[piece_from.y][piece_from.x] == 6) or (piece_to.y == 1 and board[piece_from.y][piece_from.x] == -6)
 
 		-- promotion
-		if (piece_to.y == 8 and board[piece_from.y][piece_from.x] == 6) or (piece_to.y == 1 and board[piece_from.y][piece_from.x] == -6) then
+		if (need_promotion) then
 			local new_type = "q"	-- default to Queen
 			if interface.get_promotion then
 				new_type = interface.get_promotion()
 			end
 
-			move = move .. new_type
-		end
-
-		if (protocol == "xboard") then
-			send_cmd("move " .. move)
-		elseif (protocol == "uci") then
-			send_cmd("bestmove " .. move)
+			if (new_type ~= nil) then
+				move = move .. new_type
+				need_promotion = false
+				send_move(move)
+			end
+		else
+			send_move(move)
 		end
 
 		make_move(move, "", false)
+
+		-- some machines show the promotion only after the pawn has been moved
+		if (need_promotion) then
+			local new_type = nil
+			if interface.get_promotion then
+				new_type = interface.get_promotion()
+			end
+
+			if (new_type == nil) then
+				manager:machine():logerror(manager:machine():system().name .. " Unable to determine the promotion")
+				new_type = "q"	-- default to Queen
+			end
+
+			promote_pawn(piece_to, new_type, false)
+			move = move .. new_type
+			send_move(move)
+		end
+	end
+end
+
+local function send_options()
+	local tag_default = ""
+	local tag_min = " "
+	local tag_max = " "
+
+	if (protocol == "uci") then
+		tag_default = "default "
+		tag_min = " min "
+		tag_max = " max "
+	end
+
+	for idx,opt in ipairs(interface.get_options()) do
+		local opt_data = nil
+		if     (#opt == 3 and opt[1] == "string") then    opt_data = tag_default .. tostring(opt[3])
+		elseif (#opt == 2 and opt[1] == "button") then    opt_data = ''
+		elseif (#opt == 5 and opt[1] == "spin")   then    opt_data = tag_default .. tostring(opt[3]) .. tag_min .. tostring(opt[4]) .. tag_max .. tostring(opt[5])
+		elseif (#opt == 3 and opt[1] == "check")  then
+			if protocol == "uci" then
+				opt_data = tag_default .. tostring(opt[3]:gsub("1", "true"):gsub("0", "false"))
+			elseif protocol == "xboard" then
+				opt_data = tag_default .. tostring(opt[3])
+			end
+		elseif (#opt == 4 and opt[1] == "combo")  then
+			if protocol == "uci" then
+				opt_data = tag_default .. tostring(opt[3]) .. " var " .. tostring(opt[4]):gsub("\t", " var ")
+			elseif protocol == "xboard" then
+				opt_data = tostring(opt[4]):gsub("%f[%w_]" .. tostring(opt[3]) .. "%f[^%w_]", "*" .. tostring(opt[3])):gsub("\t", " /// ")
+			end
+		end
+		if (opt_data ~= nil) then
+			if protocol == "uci" then
+				send_cmd('option name ' .. tostring(opt[2])  .. ' type ' .. tostring(opt[1]) .. ' ' .. opt_data)
+			elseif protocol == "xboard" then
+				send_cmd('feature option="' .. tostring(opt[2])  .. ' -' .. tostring(opt[1]) .. ' ' .. opt_data .. '"')
+			end
+		else
+			manager:machine():logerror("Invalid interface options '" .. tostring(opt[1]) .. " " .. tostring(opt[2]) .. "'")
+		end
+	end
+end
+
+local function set_option(name, value)
+	if (name == nil or value == nil) then
+		return
+	end
+
+	if (string.lower(name) == "speed") then
+		if (tonumber(value) == 0) then	-- 0 = unlimited
+			manager:machine():video().throttled = false
+		else
+			manager:machine():video().throttled = true
+			manager:machine():video().throttle_rate = tonumber(value) / 100.0
+		end
+	elseif (interface.set_option) then
+		interface.set_option(string.lower(name), value)
 	end
 end
 
 local function execute_uci_command(cmd)
 	if cmd == "uci" then
 		protocol = cmd
+		send_cmd("id name " .. describe_system())
+		send_cmd("option name Speed type spin default 100 min 0 max 10000")
+		if interface.get_options then
+			send_options()
+		end
 		send_cmd("uciok")
 	elseif cmd == "isready" then
-		send_cmd("id name " .. describe_system())
-		board_reset()
 		send_cmd("readyok")
 	elseif cmd == "ucinewgame" then
 		if game_started == true then
 			manager:machine():soft_reset()
-			board_reset()
 		end
+		board_reset()
 	elseif cmd == "quit" then
 		manager:machine():exit()
 	elseif cmd:match("^go") ~= nil then
@@ -248,6 +347,12 @@ local function execute_uci_command(cmd)
 				interface.start_play()
 			end
 		end
+	elseif cmd:match("^setoption name ") ~= nil then
+		local opt_name, opt_val = string.match(cmd:sub(16), '(.+) value (.+)')
+		if     (string.lower(opt_val) == "true" ) then opt_val = "1"
+		elseif (string.lower(opt_val) == "false") then opt_val = "0"
+		end
+		set_option(opt_name, opt_val)
 	elseif cmd:match("^position startpos moves") ~= nil then
 		game_started = true
 		local last_move = ""
@@ -257,6 +362,7 @@ local function execute_uci_command(cmd)
 		make_move(last_move, "", true)
 		piece_from = nil
 		piece_to = nil
+		sel_started = false
 	else
 		manager:machine():logerror("Unhandled UCI command '" .. cmd .. "'")
 	end
@@ -267,25 +373,20 @@ local function execute_xboard_command(cmd)
 		protocol = cmd
 	elseif cmd:match("^protover") then
 		send_cmd("feature done=0")
-		send_cmd("feature myname=\"" .. describe_system() .. "\"")
+		send_cmd("feature myname=\"" .. describe_system() .. "\" colors=0 usermove=1 sigint=0 sigterm=0")
+		send_cmd('feature option="Speed -spin 100 0 10000"')
+		if interface.get_options then
+			send_options()
+		end
 		send_cmd("feature done=1")
-		board_reset()
 	elseif cmd == "new" then
 		if game_started == true then
 			manager:machine():soft_reset()
 		end
 		board_reset()
-	elseif cmd == "white" then
-		my_color = "W"
-		if game_started == false and ply == my_color then
-			sel_started = false
-			if interface.start_play then
-				interface.start_play()
-			end
-		end
-	elseif cmd == "black" then
-		my_color = "B"
-		if game_started == false and ply == my_color then
+	elseif cmd == "go" then
+		my_color = ply
+		if game_started == false then
 			sel_started = false
 			if interface.start_play then
 				interface.start_play()
@@ -293,9 +394,12 @@ local function execute_xboard_command(cmd)
 		end
 	elseif cmd == "quit" then
 		manager:machine():exit()
-	elseif cmd:match("^[abcdefgh][12345678][abcdefgh][12345678]") ~= nil then
+	elseif cmd:match("^option ") ~= nil then
+		local opt_name, opt_val = string.match(cmd:sub(8), '([^=]+)=([^=]+)')
+		set_option(opt_name, opt_val)
+	elseif cmd:match("^usermove ") ~= nil then
 		game_started = true
-		make_move(cmd, "", true)
+		make_move(cmd:sub(10), "", true)
 		piece_from = nil
 		piece_to = nil
 		sel_started = false
@@ -317,6 +421,9 @@ local function update()
 			elseif protocol == "xboard" then
 				execute_xboard_command(command)
 			end
+
+			conth:continue(conth.result)
+			emu.wait(0.1)
 		end
 	until command == nil
 

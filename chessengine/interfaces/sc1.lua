@@ -6,6 +6,7 @@ interface = {}
 local turn = true
 
 function interface.setup_machine()
+	turn = true
 	emu.wait(1.0)
 end
 

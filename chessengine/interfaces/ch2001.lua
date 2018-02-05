@@ -16,8 +16,8 @@ function interface.setup_machine()
 		end
 	end
 
-	emu.wait(1.0)
 	send_input(":IN.9", 0x02, 1)
+	emu.wait(1.0)
 end
 
 function interface.start_play()

@@ -18,13 +18,22 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	if (event ~= "capture" and event ~= "en_passant") then
+	if (event ~= "capture") then
 		send_input(":board:IN." .. tostring(y - 1), 1 << (x - 1), 1)
 	end
 end
 
 function interface.get_promotion()
-	return 'q'	-- TODO
+	-- HD44780 Display Data RAM
+	local ddram = emu.item(machine.devices[':display:hd44780'].items['0/m_ddram']):read_block(0x00, 0x80)
+
+	if     (ddram:sub(65,81):find('\x04') or ddram:sub(65,81):find('\x0c')) then	return 'q'
+	elseif (ddram:sub(65,81):find('\x03') or ddram:sub(65,81):find('\x0b')) then	return 'r'
+	elseif (ddram:sub(65,81):find('\x02') or ddram:sub(65,81):find('\x0a')) then	return 'b'
+	elseif (ddram:sub(65,81):find('\x01') or ddram:sub(65,81):find('\x09')) then	return 'n'
+	end
+
+	return nil
 end
 
 function interface.promote(x, y, piece)

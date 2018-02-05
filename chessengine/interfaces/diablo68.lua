@@ -1,4 +1,4 @@
 -- license:BSD-3-Clause
 -- copyright-holders:Sandro Ronco
 
-return load_interface("supercon")
+return load_interface("sexperta")
