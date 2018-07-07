@@ -78,7 +78,7 @@ function interface.select_piece(x, y, event)
 end
 
 function interface.get_options()
-    return { { "spin", "Level", "1", "1", "8"}, }
+    return { { "spin", "Level", "4", "1", "8"}, }  -- default difficulty level is 4
 end
 
 function interface.set_option(name, value)
