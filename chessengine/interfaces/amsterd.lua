@@ -3,11 +3,48 @@
 
 interface = load_interface("glasgow")
 
-function interface.start_play()
-	send_input(":LINE1", 0x20, 1)
+interface.level = 2
+interface.cur_level = nil
+
+function interface.setlevel()
+	if (interface.cur_level == nil or interface.cur_level == interface.level) then
+		return
+	end
+	interface.cur_level = interface.level
+	if (interface.level == 7 or interface.level == 8) then
+		return
+	end
+	send_input(":LINE1", 0x04, 1) -- LEV
+	if     (interface.level == 0) then	send_input(":LINE0", 0x80, 1)
+	elseif (interface.level == 1) then	send_input(":LINE0", 0x01, 1)
+	elseif (interface.level == 2) then	send_input(":LINE0", 0x02, 1)
+	elseif (interface.level == 3) then	send_input(":LINE0", 0x04, 1)
+	elseif (interface.level == 4) then	send_input(":LINE0", 0x08, 1)
+	elseif (interface.level == 5) then	send_input(":LINE0", 0x10, 1)
+	elseif (interface.level == 6) then	send_input(":LINE0", 0x20, 1)
+	elseif (interface.level == 7) then	send_input(":LINE1", 0x40, 1)
+	elseif (interface.level == 8) then	send_input(":LINE1", 0x80, 1)
+	elseif (interface.level == 9) then	send_input(":LINE0", 0x40, 1)
+	end
+	send_input(":LINE1", 0x20, 1) -- ENT
 end
 
-function interface.get_promotion()
+function interface.start_play(init)
+	send_input(":LINE1", 0x20, 1) -- ENT
+end
+
+function interface.set_option(name, value)
+	if (name == "level") then
+		local level = tonumber(value)
+		if (level < 0 or level > 9) then
+			return
+		end
+		interface.level = level
+		interface.setlevel()
+	end
+end
+
+function interface.get_promotion(x, y)
 	send_input(":LINE1", 0x01, 0.5)	-- INFO
 	send_input(":LINE0", 0x01, 0.5)	-- 1
 
@@ -35,6 +72,7 @@ function interface.get_promotion()
 end
 
 function interface.promote(x, y, piece)
+	sb_promote(":board:board", x, y, piece)
 	if     (piece == "q") then	send_input(":LINE0", 0x20, 1)
 	elseif (piece == "r") then	send_input(":LINE0", 0x10, 1)
 	elseif (piece == "b") then	send_input(":LINE0", 0x08, 1)

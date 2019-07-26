@@ -1,4 +1,4 @@
 -- license:BSD-3-Clause
 -- copyright-holders:Sandro Ronco
 
-return load_interface("alm16")
+return load_interface("lyon16")

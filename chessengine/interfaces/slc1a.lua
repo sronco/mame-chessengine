@@ -3,16 +3,32 @@
 
 interface = {}
 
-local turn = true
+interface.turn = true
+interface.level = 1
+interface.cur_level = nil
 
-function interface.setup_machine()
-	turn = true
-	emu.wait(1.0)
+function interface.setlevel()
+	if (interface.cur_level == nil or interface.cur_level == interface.level) then
+		return
+	end
+	interface.cur_level = interface.level
+	send_input(":LINE8", 0x80, 1) -- St (Clear)
+	send_input(":LINE6", 0x80, 1) -- A (View)
+	interface.send_pos(interface.level)
+	send_input(":LINE8", 0x80, 1) -- St (Clear)
 end
 
-function interface.start_play()
-	turn = false
-	send_input(":LINE7", 0x80, 1)
+function interface.setup_machine()
+	interface.turn = true
+	emu.wait(1.0)
+
+	interface.cur_level = 1
+	interface.setlevel()
+end
+
+function interface.start_play(init)
+	interface.turn = false
+	send_input(":LINE7", 0x80, 1) -- Z (Enter)
 end
 
 function interface.is_selected(x, y)
@@ -39,21 +55,38 @@ end
 
 function interface.select_piece(x, y, event)
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
-		if (turn) then
+		machine:outputs():set_value("busyled", 0)
+		if (interface.turn) then
 			interface.send_pos(x)
 			interface.send_pos(y)
 		end
 
 		if (event == "put") then
-			if (turn) then
-				send_input(":LINE6", 0x80, 1)
+			if (interface.turn) then
+				send_input(":LINE7", 0x80, 1)
+				machine:outputs():set_value("busyled", 1)
 			end
-			turn = not turn
+			interface.turn = not interface.turn
 		end
 	end
 end
 
-function interface.get_promotion()
+function interface.get_options()
+	return { { "spin", "Level", "1", "1", "8"}, }
+end
+
+function interface.set_option(name, value)
+	if (name == "level") then
+		local level = tonumber(value)
+		if (level < 1 or level > 8) then
+			return
+		end
+		interface.level = level
+		interface.setlevel()
+	end
+end
+
+function interface.get_promotion(x, y)
 	return 'q'	-- TODO
 end
 

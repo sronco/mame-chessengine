@@ -4,8 +4,12 @@
 interface = load_interface("npresto")
 
 function interface.select_piece(x, y, event)
-	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
-		send_input(":IN." .. tostring(y - 1), 1 << (x - 1), 0.3)
+	if (event == "en_passant") then
+		sb_remove_piece(":board", x, y)
+	elseif (event == "get_castling" or event == "put_castling") then
+		sb_move_piece(":board", x, y)
+	else
+		sb_select_piece(":board", 0.3, x, y, event)
 	end
 end
 

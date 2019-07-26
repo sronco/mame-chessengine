@@ -22,6 +22,7 @@ local my_color = "B"
 local ply = "W"
 local piece_from = nil
 local piece_to = nil
+local prev_move = nil
 local scr = [[
 	while true do
 		_G.status = io.stdin:read("*line")
@@ -41,6 +42,7 @@ local function board_reset()
 	ply = "W"
 	piece_from = nil
 	piece_to = nil
+	prev_move = nil
 
 	board = {{ 3, 5, 4, 2, 1, 4, 5, 3 },
 		{  6, 6, 6, 6, 6, 6, 6, 6 },
@@ -92,6 +94,102 @@ local function send_input(tag, mask, seconds)
 	emu.wait(seconds * 1 / 3)
 end
 
+local function sb_set_ui(tag, mask, state)
+	local field = manager:machine():ioport().ports[tag .. ":UI"]:field(mask)
+	if (field ~= nil) then
+		field:set_value(state)
+		emu.wait(0.5)
+	end
+end
+
+local function sb_press_square(tag, seconds, x, y)
+	sb_set_ui(tag, 0x0001, 1)
+	send_input(tag .. ":RANK." .. tostring(y), 1 << (x - 1), seconds)
+	sb_set_ui(tag, 0x0001, 0)
+end
+
+local function sb_promote(tag, x, y, piece)
+	local mask = 0
+	if     (string.lower(piece) == 'q') then	mask = 0x10
+	elseif (string.lower(piece) == 'r') then	mask = 0x08
+	elseif (string.lower(piece) == 'b') then	mask = 0x04
+	elseif (string.lower(piece) == 'n') then	mask = 0x02
+	end
+
+	if board[y][x] < 0 or (board[y][x] == 0 and y == 8) then
+		mask = mask << 6
+	end
+
+	send_input(tag .. ":SPAWN", mask, 0.09)
+	if (manager:machine():outputs():get_value("piece_ui0") ~= 0) then
+		sb_set_ui(tag, 0x0002, 1)
+		send_input(tag .. ":RANK." .. tostring(y), 1 << (x - 1), 0.09)
+		sb_set_ui(tag, 0x0002, 0)
+	end
+end
+
+local function sb_remove_piece(tag, x, y)
+	sb_set_ui(tag, 0x0002, 1)
+	send_input(tag .. ":RANK." .. tostring(y), 1 << (x - 1), 0.09)
+	sb_set_ui(tag, 0x0002, 0)
+	send_input(tag .. ":UI", 0x0008, 0.09)	-- SensorBoard REMOVE
+end
+
+local function sb_select_piece(tag, seconds, x, y, event)
+	if (event ~= "capture") then
+		send_input(tag .. ":RANK." .. tostring(y), 1 << (x - 1), seconds)
+	end
+	if (event == "en_passant") then
+		send_input(tag .. ":UI", 0x0008, seconds)	-- SensorBoard REMOVE
+	end
+end
+
+local function sb_move_piece(tag, x, y)
+	sb_set_ui(tag, 0x0002, 1)
+	sb_select_piece(tag, 0.09, x, y, "")
+	sb_set_ui(tag, 0x0002, 0)
+end
+
+local function sb_reset_board(tag)
+	send_input(tag .. ":UI", 0x0200, 0.09)	-- SensorBoard RESET
+end
+
+local function sb_rotate_board(tag)
+	sb_set_ui(tag, 0x0002, 1)
+	send_input(tag .. ":UI", 0x0200, 0.09)	-- SensorBoard RESET
+	sb_set_ui(tag, 0x0002, 0)
+end
+
+local function get_piece_id(x, y)
+	if (board ~= nil) then
+		return board[y][x]
+	end
+	return 0
+end
+
+local function get_move_type(fx, fy, tx, ty)
+	if (fy == 1 and fx == 5 and ty == 1 and (tx == 3 or tx == 7) and get_piece_id(fx, fy) == 1) or
+	   (fy == 8 and fx == 5 and ty == 8 and (tx == 3 or tx == 7) and get_piece_id(fx, fy) == -1) then
+		return "castling"
+
+	elseif (fx ~= tx and fy == 5 and ty == 6 and get_piece_id(fx, fy) == 6 and get_piece_id(tx, ty) == 0) or
+	       (fx ~= tx and fy == 4 and ty == 3 and get_piece_id(fx, fy) == -6 and get_piece_id(tx, ty) == 0) then
+		return "en_passant"
+
+	elseif (get_piece_id(fx, fy) == 6 and ty == 8) or (get_piece_id(fx, fy) == -6 and ty == 1) then
+		if (get_piece_id(tx, ty) ~= 0) then
+			return "capture_promotion"
+		else
+			return "promotion"
+		end
+
+	elseif (get_piece_id(tx, ty) ~= 0) then
+		return "capture"
+	end
+
+	return nil
+end
+
 local function recv_cmd()
 	if conth.yield then
 		return conth.result
@@ -105,6 +203,7 @@ local function send_cmd(cmd)
 end
 
 local function send_move(move)
+	prev_move = move
 	if (protocol == "xboard") then
 		send_cmd("move " .. move)
 	elseif (protocol == "uci") then
@@ -123,11 +222,9 @@ local function make_move(move, reason, promotion)
 		end
 		if board[to.y][to.x] ~= 0 then
 			interface.select_piece(to.x, to.y, "capture")
-			emu.wait(0.5)
 		end
 
 		interface.select_piece(to.x, to.y, "put" .. reason)
-		emu.wait(0.5)
 	end
 
 	piece_get = false
@@ -229,7 +326,7 @@ local function search_selected_piece()
 		if (need_promotion) then
 			local new_type = "q"	-- default to Queen
 			if interface.get_promotion then
-				new_type = interface.get_promotion()
+				new_type = interface.get_promotion(piece_to.x, piece_to.y)
 			end
 
 			if (new_type ~= nil) then
@@ -247,7 +344,7 @@ local function search_selected_piece()
 		if (need_promotion) then
 			local new_type = nil
 			if interface.get_promotion then
-				new_type = interface.get_promotion()
+				new_type = interface.get_promotion(piece_to.x, piece_to.y)
 			end
 
 			if (new_type == nil) then
@@ -333,19 +430,23 @@ local function execute_uci_command(cmd)
 		send_cmd("readyok")
 	elseif cmd == "ucinewgame" then
 		if game_started == true then
+			game_started = false
 			manager:machine():soft_reset()
 		end
 		board_reset()
 	elseif cmd == "quit" then
 		manager:machine():exit()
 	elseif cmd:match("^go") ~= nil then
-		if game_started == false then
+		if board == nil then
+			board_reset()
+		end
+		if game_started == false or my_color ~= ply then
+			if interface.start_play then
+				interface.start_play(not game_started)
+			end
+			my_color = ply
 			game_started = true
 			sel_started = false
-			my_color = "W"
-			if interface.start_play then
-				interface.start_play()
-			end
 		end
 	elseif cmd:match("^setoption name ") ~= nil then
 		local opt_name, opt_val = string.match(cmd:sub(16), '(.+) value (.+)')
@@ -354,15 +455,34 @@ local function execute_uci_command(cmd)
 		end
 		set_option(opt_name, opt_val)
 	elseif cmd:match("^position startpos moves") ~= nil then
+		if board == nil then
+			board_reset()
+		end
 		game_started = true
 		local last_move = ""
 		for i in string.gmatch(cmd, "%S+") do
 			last_move = i
 		end
-		make_move(last_move, "", true)
-		piece_from = nil
-		piece_to = nil
-		sel_started = false
+		if (last_move == prev_move) then
+			my_color = ply
+			sel_started = false
+			if interface.start_play then
+				interface.start_play(not game_started)
+			end
+		else
+			make_move(last_move, "", true)
+			piece_from = nil
+			piece_to = nil
+			sel_started = false
+		end
+	elseif cmd == "stop" then
+		if game_started == true then
+			if interface.stop_play then
+				interface.stop_play()
+			elseif interface.start_play then
+				interface.start_play(not game_started)
+			end
+		end
 	else
 		manager:machine():logerror("Unhandled UCI command '" .. cmd .. "'")
 	end
@@ -381,16 +501,27 @@ local function execute_xboard_command(cmd)
 		send_cmd("feature done=1")
 	elseif cmd == "new" then
 		if game_started == true then
+			game_started = false
 			manager:machine():soft_reset()
 		end
 		board_reset()
 	elseif cmd == "go" then
-		my_color = ply
-		if game_started == false then
-			sel_started = false
+		if (board == nil) then
+			board_reset()
+		end
+		sel_started = false
+		if game_started == false or my_color ~= ply then
 			if interface.start_play then
-				interface.start_play()
+				interface.start_play(not game_started)
 			end
+			game_started = true
+			my_color = ply
+		end
+	elseif (cmd == "?") then
+		if interface.stop_play then
+			interface.stop_play()
+		elseif interface.start_play then
+			interface.start_play(not game_started)
 		end
 	elseif cmd == "quit" then
 		manager:machine():exit()
@@ -398,6 +529,9 @@ local function execute_xboard_command(cmd)
 		local opt_name, opt_val = string.match(cmd:sub(8), '([^=]+)=([^=]+)')
 		set_option(opt_name, opt_val)
 	elseif cmd:match("^usermove ") ~= nil then
+		if board == nil then
+			board_reset()
+		end
 		game_started = true
 		make_move(cmd:sub(10), "", true)
 		piece_from = nil
@@ -434,8 +568,10 @@ local function update()
 end
 
 local function load_interface(name)
-	local env = { machine = manager:machine(), send_input = send_input, load_interface = load_interface, emu = emu,
-			pairs = pairs, ipairs = ipairs, tostring = tostring, tonumber = tonumber, print = emu.print_debug }
+	local env = { machine = manager:machine(), send_input = send_input, get_piece_id = get_piece_id, get_move_type = get_move_type, load_interface = load_interface, emu = emu,
+			sb_select_piece = sb_select_piece, sb_move_piece = sb_move_piece, sb_press_square = sb_press_square, sb_promote = sb_promote,
+			sb_remove_piece = sb_remove_piece, sb_reset_board = sb_reset_board, sb_rotate_board = sb_rotate_board, sb_set_ui = sb_set_ui,
+			pairs = pairs, ipairs = ipairs, tostring = tostring, tonumber = tonumber, string = string, math = math, print = _G.print }
 
 	local func = loadfile(plugin_path .. "/interfaces/" .. name .. ".lua", "t", env)
 	if func then
@@ -463,8 +599,9 @@ function exports.startplugin()
 	emu.register_start(
 	function()
 		local system = manager:machine():system().name
-		interface = load_interface(system)
-
+		if interface == nil then
+			interface = load_interface(system)
+		end
 		if interface == nil and manager:machine():system().parent ~= nil then
 			interface = load_interface(manager:machine():system().parent)
 		end

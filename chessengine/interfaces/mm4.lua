@@ -3,26 +3,41 @@
 
 interface = {}
 
-function interface.setup_machine()
-	-- setup board pieces
-	for y=0,7 do
-		local port_tag = ":board:IN." .. tostring(y)
-		local port_val = machine:ioport().ports[port_tag]:read()
-		for x=0,7 do
-			local req_pos = y == 0 or y == 1 or y == 6 or y == 7
-			if ((req_pos == true and port_val & (1 << (7 - x)) ~= 0) or (req_pos == false and port_val & (1 << (7 - x)) == 0)) then
-				send_input(port_tag, 1 << (7 - x), 0.10)
-			end
-		end
-	end
+interface.level = 1
+interface.cur_level = nil
 
-	machine:soft_reset()
-	emu.wait(1.0)
-	send_input(":KEY1_0", 0x80, 1)
+function interface.setlevel()
+	if (interface.cur_level == nil or interface.cur_level == interface.level) then
+		return
+	end
+	interface.cur_level = interface.level
+	send_input(":KEY1_4", 0x80, 1) -- LEV
+	if     (interface.level == 0) then	send_input(":KEY1_6", 0x80, 1)
+	elseif (interface.level == 1) then	send_input(":KEY2_3", 0x80, 1)
+	elseif (interface.level == 2) then	send_input(":KEY2_5", 0x80, 1)
+	elseif (interface.level == 3) then	send_input(":KEY2_6", 0x80, 1)
+	elseif (interface.level == 4) then	send_input(":KEY2_7", 0x80, 1)
+	elseif (interface.level == 5) then	send_input(":KEY2_0", 0x80, 1)
+	elseif (interface.level == 6) then	send_input(":KEY2_1", 0x80, 1)
+	elseif (interface.level == 7) then	send_input(":KEY2_2", 0x80, 1)
+	elseif (interface.level == 8) then	send_input(":KEY2_4", 0x80, 1)
+	elseif (interface.level == 9) then	send_input(":KEY1_7", 0x80, 1)
+	end
+	send_input(":KEY1_5", 0x80, 1) -- ENT
 end
 
-function interface.start_play()
-	send_input(":KEY1_5", 0x80, 1)
+function interface.setup_machine()
+	sb_reset_board(":board:board")
+	emu.wait(1.0)
+--	send_input(":KEY1_0", 0x80, 1) -- CL
+--	emu.wait(1.0)
+
+	interface.cur_level = 1
+	interface.setlevel()
+end
+
+function interface.start_play(init)
+	send_input(":KEY1_5", 0x80, 1) -- ENT
 end
 
 function interface.is_selected(x, y)
@@ -36,7 +51,7 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	send_input(":board:IN." .. tostring(y - 1), 1 << (x - 1), 1)
+	sb_select_piece(":board:board", 1.5, x, y, event)
 end
 
 function interface.get_options()
@@ -49,25 +64,12 @@ function interface.set_option(name, value)
 		if (level < 0 or level > 9) then
 			return
 		end
-
-		send_input(":KEY1_4", 0x80, 1)		-- LEV
-		if     (level == 0) then	send_input(":KEY1_6", 0x80, 1)
-		elseif (level == 1) then	send_input(":KEY2_3", 0x80, 1)
-		elseif (level == 2) then	send_input(":KEY2_5", 0x80, 1)
-		elseif (level == 3) then	send_input(":KEY2_6", 0x80, 1)
-		elseif (level == 4) then	send_input(":KEY2_7", 0x80, 1)
-		elseif (level == 5) then	send_input(":KEY2_0", 0x80, 1)
-		elseif (level == 6) then	send_input(":KEY2_1", 0x80, 1)
-		elseif (level == 7) then	send_input(":KEY2_2", 0x80, 1)
-		elseif (level == 8) then	send_input(":KEY2_4", 0x80, 1)
-		elseif (level == 9) then	send_input(":KEY1_7", 0x80, 1)
-		end
-
-		send_input(":KEY1_5", 0x80, 1)		-- CLEAR
+		interface.level = level
+		interface.setlevel()
 	end
 end
 
-function interface.get_promotion()
+function interface.get_promotion(x, y)
 	send_input(":KEY1_3", 0x80, 0.5)	-- INFO
 	send_input(":KEY2_3", 0x80, 0.5)	-- 1
 
@@ -95,6 +97,7 @@ function interface.get_promotion()
 end
 
 function interface.promote(x, y, piece)
+	sb_promote(":board:board", x, y, piece)
 	if     (piece == "q") then	send_input(":KEY2_0", 0x80, 1)
 	elseif (piece == "r") then	send_input(":KEY2_7", 0x80, 1)
 	elseif (piece == "b") then	send_input(":KEY2_6", 0x80, 1)

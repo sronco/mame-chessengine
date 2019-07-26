@@ -3,24 +3,43 @@
 
 interface = {}
 
-local turn = true
-local invert = false
+interface.turn = true
+interface.invert = false
+interface.level = 1
+interface.cur_level = nil
 
-function interface.setup_machine()
-	turn = true
-	invert = false
-	emu.wait(1.0)
-	send_input(":IN.1", 0x01, 1)
+function interface.setlevel()
+	if (interface.cur_level == nil or interface.cur_level == interface.level) then
+		return
+	end
+	interface.cur_level = interface.level
+	local lcd_num = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07 }
+	repeat
+		send_input(":IN.3", 0x02, 0.5) -- LV
+	until machine:outputs():get_value("digit3") == lcd_num[interface.level]
+	send_input(":IN.1", 0x01, 0.5) -- CL
 end
 
-function interface.start_play()
-	invert = true
-	turn = false
-	send_input(":IN.0", 0x01, 1)
+function interface.setup_machine()
+	interface.turn = true
+	interface.invert = false
+	send_input(":IN.1", 0x01, 1) -- CL
+	emu.wait(1.0)
+
+	interface.cur_level = 1
+	interface.setlevel()
+end
+
+function interface.start_play(init)
+	if (init) then
+		interface.invert = true
+		interface.turn = false
+		send_input(":IN.0", 0x01, 1) -- EN
+	end
 end
 
 function interface.is_selected(x, y)
-	if (invert) then
+	if (interface.invert) then
 		x = 9 - x
 		y = 9 - y
 	end
@@ -46,22 +65,21 @@ function interface.send_pos(p)
 end
 
 function interface.select_piece(x, y, event)
-	if (invert) then
+	if (interface.invert) then
 		x = 9 - x
 		y = 9 - y
 	end
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
-		if (turn) then
+		if (interface.turn) then
 			interface.send_pos(x)
 			interface.send_pos(y)
 		end
 
-
 		if (event == "put") then
-			if (turn) then
-				send_input(":IN.0", 0x01, 1)
+			if (interface.turn) then
+				send_input(":IN.0", 0x01, 1) -- EN
 			end
-			turn = not turn
+			interface.turn = not interface.turn
 		end
 	end
 end
@@ -76,14 +94,12 @@ function interface.set_option(name, value)
 		if (level < 1 or level > 7) then
 			return
 		end
-		local lcd_num = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07 }
-		repeat
-			send_input(":IN.3", 0x02, 0.5)
-		until machine:outputs():get_value("digit3") == lcd_num[level]
+		interface.level = level
+		interface.setlevel()
 	end
 end
 
-function interface.get_promotion()
+function interface.get_promotion(x, y)
 	return 'q'	-- TODO
 end
 

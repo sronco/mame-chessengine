@@ -3,13 +3,29 @@
 
 interface = {}
 
-function interface.setup_machine()
-	emu.wait(1.0)
-	send_input(":BUTTONS", 0x80, 1)
+interface.level = 1
+interface.cur_level = nil
+
+function interface.setlevel()
+	if (interface.cur_level == nil or interface.cur_level == interface.level) then
+		return
+	end
+	interface.cur_level = interface.level
+	send_input(":BUTTONS", 0x40, 1) -- Level
+	send_input(":BUTTONS", 0x80 >> (interface.level - 1), 1)
 end
 
-function interface.start_play()
-	send_input(":BUTTONS", 0x20, 1)
+function interface.setup_machine()
+	sb_reset_board(":board")
+	send_input(":BUTTONS", 0x80, 1) -- New Game
+	emu.wait(1.0)
+
+	interface.cur_level = 1
+	interface.setlevel()
+end
+
+function interface.start_play(init)
+	send_input(":BUTTONS", 0x20, 1) -- Color
 end
 
 function interface.is_selected(x, y)
@@ -18,8 +34,7 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	local port_tags = { "A", "B", "C", "D", "E", "F", "G", "H" }
-	send_input(":COL_" .. port_tags[x], 1 << (y - 1), 1)
+	sb_select_piece(":board", 1, x, y, event)
 end
 
 function interface.get_options()
@@ -32,16 +47,17 @@ function interface.set_option(name, value)
 		if (level < 1 or level > 8) then
 			return
 		end
-		send_input(":BUTTONS", 0x40, 1)
-		send_input(":BUTTONS", 0x80 >> (level - 1), 1)
+		interface.level = level
+		interface.setlevel()
 	end
 end
 
-function interface.get_promotion()
+function interface.get_promotion(x, y)
 	return 'q'	-- TODO
 end
 
 function interface.promote(x, y, piece)
+	sb_promote(":board", x, y, piece)
 	-- TODO
 end
 

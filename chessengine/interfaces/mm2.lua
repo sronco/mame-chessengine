@@ -4,23 +4,18 @@
 interface = load_interface("mm4")
 
 function interface.setup_machine()
-	-- setup board pieces
-	for y=0,7 do
-		local port_tag = ":board:IN." .. tostring(y)
-		local port_val = machine:ioport().ports[port_tag]:read()
-		for x=0,7 do
-			local req_pos = y == 0 or y == 1 or y == 6 or y == 7
-			if ((req_pos == true and port_val & (1 << (7 - x)) ~= 0) or (req_pos == false and port_val & (1 << (7 - x)) == 0)) then
-				send_input(port_tag, 1 << (7 - x), 0.10)
-			end
-		end
+	sb_reset_board(":board:board")
+	emu.wait(1.0)
+	while (machine:outputs():get_indexed_value("led", 105) == 0 or machine:outputs():get_value("digit0") ~= 0x73) do
+		machine:soft_reset()
+		emu.wait(1.0)
 	end
 
-	emu.wait(1.0)
-	send_input(":KEY1_0", 0x80, 1)
+	interface.cur_level = 1
+	interface.setlevel()
 end
 
-function interface.get_promotion()
+function interface.get_promotion(x, y)
 	local d0 = machine:outputs():get_value("digit0") & 0x7f
 	local d1 = machine:outputs():get_value("digit1") & 0x7f
 	local d3 = machine:outputs():get_value("digit3") & 0x7f
@@ -37,6 +32,7 @@ function interface.get_promotion()
 end
 
 function interface.promote(x, y, piece)
+	sb_promote(":board:board", x, y, piece)
 	if     (piece == "q" or piece == "Q") then	send_input(":KEY2_0", 0x80, 1)
 	elseif (piece == "r" or piece == "R") then	send_input(":KEY2_7", 0x80, 1)
 	elseif (piece == "b" or piece == "B") then	send_input(":KEY2_6", 0x80, 1)

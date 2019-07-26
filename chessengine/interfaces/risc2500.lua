@@ -4,10 +4,11 @@
 interface = {}
 
 function interface.setup_machine()
+	sb_reset_board(":board")
 	emu.wait(5) -- boot time
 end
 
-function interface.start_play()
+function interface.start_play(init)
 	send_input(":P5", 0x80000000, 1)
 end
 
@@ -18,12 +19,10 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	if (event ~= "capture") then
-		send_input(":P" .. tostring(y - 1), 0x80 >> (x - 1), 1)
-	end
+	sb_select_piece(":board", 1, x, y, event)
 end
 
-function interface.get_promotion()
+function interface.get_promotion(x, y)
 	local ddram = emu.item(machine.devices[':maincpu']:owner().items['0/m_vram']):read_block(0x00, 0x100)
 
 	-- LCD symbols used to represent chess pieces
@@ -37,6 +36,7 @@ function interface.get_promotion()
 end
 
 function interface.promote(x, y, piece)
+	sb_promote(":board", x, y, piece)
 	if     (piece == "q") then	send_input(":P4", 0x40000000, 1)
 	elseif (piece == "r") then	send_input(":P3", 0x40000000, 1)
 	elseif (piece == "b") then	send_input(":P2", 0x40000000, 1)
