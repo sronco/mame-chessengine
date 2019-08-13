@@ -89,7 +89,7 @@ function interface.select_piece(x, y, event)
 end
 
 function interface.get_options()
-	return { { "string", "Level", "a2"}, }
+	return { { "string", "Level", "a1"}, }
 end
 
 function interface.set_option(name, value)

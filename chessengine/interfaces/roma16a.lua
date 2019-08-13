@@ -1,7 +1,7 @@
 -- license:BSD-3-Clause
 -- copyright-holders:Sandro Ronco
 
-interface = load_interface("amsterd")
+interface = load_interface("glasgow")
 
 interface.level = 2
 interface.cur_level = nil
@@ -18,22 +18,22 @@ function interface.setlevel()
 	if (interface.level < 10) then
 		lev = "0" .. lev
 	end
-	send_input(":LINE1", 0x04, 1) -- LEV
+	send_input(":LINE1", 0x20, 1) -- LEV
 	for i=1,2 do
 		local dig = tonumber(lev:sub(i,i))
-		if     (dig == 0) then	send_input(":LINE0", 0x80, 1)
-		elseif (dig == 1) then	send_input(":LINE0", 0x01, 1)
-		elseif (dig == 2) then	send_input(":LINE0", 0x02, 1)
+		if     (dig == 0) then	send_input(":LINE1", 0x04, 1)
+		elseif (dig == 1) then	send_input(":LINE0", 0x20, 1)
+		elseif (dig == 2) then	send_input(":LINE0", 0x80, 1)
 		elseif (dig == 3) then	send_input(":LINE0", 0x04, 1)
-		elseif (dig == 4) then	send_input(":LINE0", 0x08, 1)
-		elseif (dig == 5) then	send_input(":LINE0", 0x10, 1)
-		elseif (dig == 6) then	send_input(":LINE0", 0x20, 1)
+		elseif (dig == 4) then	send_input(":LINE0", 0x10, 1)
+		elseif (dig == 5) then	send_input(":LINE1", 0x01, 1)
+		elseif (dig == 6) then	send_input(":LINE0", 0x40, 1)
 		elseif (dig == 7) then	send_input(":LINE1", 0x40, 1)
-		elseif (dig == 8) then	send_input(":LINE1", 0x80, 1)
-		elseif (dig == 9) then	send_input(":LINE0", 0x40, 1)
+		elseif (dig == 8) then	send_input(":LINE1", 0x10, 1)
+		elseif (dig == 9) then	send_input(":LINE0", 0x01, 1)
 		end
 	end
-	send_input(":LINE1", 0x20, 1) -- ENT
+	send_input(":LINE0", 0x08, 1) -- ENT
 end
 
 function interface.get_options()

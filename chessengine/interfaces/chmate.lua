@@ -89,6 +89,10 @@ end
 
 function interface.select_piece(x, y, event)
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
+		if (event == "get" and machine:outputs():get_value("4.0") ~= 0) then
+			send_input(":IN.1", 0x10, 1) -- CLEAR
+		end
+
 		if (interface.turn) then
 			interface.send_pos1(x)
 			interface.send_pos2(y)
