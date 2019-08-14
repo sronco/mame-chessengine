@@ -67,17 +67,6 @@ function interface.set_option(name, value)
 	end
 end
 
-function interface.set_option(name, value)
-	if (name == "level" and value ~= "") then
-		local level = tonumber(value)
-		if (level < 0 or level > 9) then
-			return
-		end
-		interface.level = level
-		interface.setlevel()
-	end
-end
-
 function interface.get_promotion(x, y)
 	return 'q'	-- TODO
 end
