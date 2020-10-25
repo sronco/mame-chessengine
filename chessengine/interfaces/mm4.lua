@@ -1,9 +1,6 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
-interface.level = 1
+interface.level = "le 1"
 interface.cur_level = nil
 
 function interface.setlevel()
@@ -12,16 +9,20 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	send_input(":KEY1_4", 0x80, 1) -- LEV
-	if     (interface.level == 0) then	send_input(":KEY1_6", 0x80, 1)
-	elseif (interface.level == 1) then	send_input(":KEY2_3", 0x80, 1)
-	elseif (interface.level == 2) then	send_input(":KEY2_5", 0x80, 1)
-	elseif (interface.level == 3) then	send_input(":KEY2_6", 0x80, 1)
-	elseif (interface.level == 4) then	send_input(":KEY2_7", 0x80, 1)
-	elseif (interface.level == 5) then	send_input(":KEY2_0", 0x80, 1)
-	elseif (interface.level == 6) then	send_input(":KEY2_1", 0x80, 1)
-	elseif (interface.level == 7) then	send_input(":KEY2_2", 0x80, 1)
-	elseif (interface.level == 8) then	send_input(":KEY2_4", 0x80, 1)
-	elseif (interface.level == 9) then	send_input(":KEY1_7", 0x80, 1)
+	if (interface.level:sub(1,2) == "bl") then
+		send_input(":KEY1_4", 0x80, 1) -- LEV
+	end
+	local n = tonumber(interface.level:sub(4))
+	if     (n == 0) then send_input(":KEY1_6", 0x80, 1)
+	elseif (n == 1) then send_input(":KEY2_3", 0x80, 1)
+	elseif (n == 2) then send_input(":KEY2_5", 0x80, 1)
+	elseif (n == 3) then send_input(":KEY2_6", 0x80, 1)
+	elseif (n == 4) then send_input(":KEY2_7", 0x80, 1)
+	elseif (n == 5) then send_input(":KEY2_0", 0x80, 1)
+	elseif (n == 6) then send_input(":KEY2_1", 0x80, 1)
+	elseif (n == 7) then send_input(":KEY2_2", 0x80, 1)
+	elseif (n == 8) then send_input(":KEY2_4", 0x80, 1)
+	elseif (n == 9) then send_input(":KEY1_7", 0x80, 1)
 	end
 	send_input(":KEY1_5", 0x80, 1) -- ENT
 end
@@ -32,7 +33,7 @@ function interface.setup_machine()
 --	send_input(":KEY1_0", 0x80, 1) -- CL
 --	emu.wait(1.0)
 
-	interface.cur_level = 1
+	interface.cur_level = "le 1"
 	interface.setlevel()
 end
 
@@ -51,21 +52,31 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
+	local d0 = machine:outputs():get_value("digit0") & 0x7f
+	local d1 = machine:outputs():get_value("digit1") & 0x7f
+	local d2 = machine:outputs():get_value("digit2") & 0x7f
+	local d3 = machine:outputs():get_value("digit3") & 0x7f
+	if ((d0 == 0x31 and d1 == 0x30 and d2 == 0x37 and d3 == 0x79)
+	or  (d0 == 0x77 and d1 == 0x06 and d2 == 0x77 and d3 == 0x06)) then -- 'TIME' or 'A1A1'
+		send_input(":KEY1_0", 0x80, 1) -- CL
+	end
 	sb_select_piece(":board:board", 1.5, x, y, event)
 end
 
 function interface.get_options()
-	return { { "spin", "Level", "1", "0", "9"}, }
+	return { { "string", "Level", "le 1"}, }
 end
 
 function interface.set_option(name, value)
 	if (name == "level") then
-		local level = tonumber(value)
-		if (level < 0 or level > 9) then
-			return
+		local level = string.lower(value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ")) -- trim
+		if (string.match(level,"^[0-9]$")) then
+			level = "le " .. level
 		end
-		interface.level = level
-		interface.setlevel()
+		if (string.match(level,"^le [0-9]$") or string.match(level,"^bl [1-8]$")) then
+			interface.level = level
+			interface.setlevel()
+		end
 	end
 end
 

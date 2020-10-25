@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -34,7 +31,6 @@ function interface.setlevel()
 end
 
 function interface.setup_machine()
-	sb_reset_board(":board")
 	interface.turn = true
 	interface.color = "B"
 	send_input(":RESET", 0x01, 0.5) -- RESET
@@ -62,12 +58,12 @@ function interface.stop_play()
 end
 
 function interface.is_selected_int(x, y)
-        if (emu.item(machine.devices[':maincpu']:owner().items['0/m_ram_address']):read()~=0x0f) then
-              emu.wait(0.5)
-              if (emu.item(machine.devices[':maincpu']:owner().items['0/m_ram_address']):read()~=0x0f) then
-                      return false
-              end
-        end
+	if (emu.item(machine.devices[':maincpu']:owner().items['0/m_ram_address']):read()~=0x0f) then
+		emu.wait(0.5)
+		if (emu.item(machine.devices[':maincpu']:owner().items['0/m_ram_address']):read()~=0x0f) then
+			return false
+		end
+	end
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 }
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
 	local d0 = machine:outputs():get_value("digit0")
@@ -100,7 +96,6 @@ function interface.send_pos(p)
 end
 
 function interface.select_piece(x, y, event)
-	sb_select_piece(":board", 0.3, x, y, event)
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
 		if (interface.turn) then
 			interface.send_pos(x)
@@ -133,7 +128,6 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
-	sb_promote(":board", x, y, piece)
 	-- TODO
 end
 

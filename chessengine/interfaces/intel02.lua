@@ -1,10 +1,8 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 -- load interface for the cartridge
-if (string.find(machine.images['cart']:filename(), 'chess2') ~= nil) then
+local module = machine.images['cart']:filename()
+if (module == "chess2") then
 	return load_interface("intel02_chess2")
-elseif (string.find(machine.images['cart']:filename(), 'chess') ~= nil) then
+elseif (module == "chess") then
 	return load_interface("intel02_chess")
 end
 

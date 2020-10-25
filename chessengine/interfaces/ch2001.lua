@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 2
@@ -28,7 +25,7 @@ function interface.setlevel()
 			end
 		end
 	until cur_level == interface.level
-	send_input(":IN.0", 0x80, 1) -- White
+--	send_input(":IN.0", 0x80, 1) -- White
 end
 
 function interface.setup_machine()

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 2
@@ -28,7 +25,7 @@ function interface.setup_machine()
 	send_input(":IN.0", 0x01, 1) -- New Game
 	emu.wait(1.0)
 
-	interface.cur_level = ""
+	interface.cur_level = 2
 	interface.setlevel()
 end
 

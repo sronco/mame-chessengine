@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 1
@@ -41,7 +38,11 @@ function interface.is_selected(x, y)
 end
 
 function interface.select_piece(x, y, event)
-	if (event ~= "get_castling" and event ~= "put_castling") then
+	if (event == "en_passant") then
+		sb_remove_piece(":board", x, y)
+	elseif (event == "get_castling" or event == "put_castling") then
+		sb_move_piece(":board", x, y)
+	else
 		sb_select_piece(":board", 1, x, y, event)
 	end
 end

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = "a2"
@@ -16,16 +13,16 @@ function interface.setlevel()
 	if (x > 5) then
 		return
 	end
-	local y = tostring(tonumber(interface.level:sub(2, 2)))
+	local y = interface.level:sub(2, 2)
 	send_input(":KEY", 0x10, 1)  -- LEVEL
 	emu.wait(0.5)
-	sb_press_square(":board:board", 1, x, y)
+	sb_press_square(":board", 1, x, y)
 	emu.wait(0.5)
 	send_input(":KEY", 0x80, 1) -- CLEAR
 end
 
 function interface.setup_machine()
-	sb_reset_board(":board:board")
+	sb_reset_board(":board")
 
 	-- CL + ENT for start a new game
 	emu.wait(1)
@@ -36,7 +33,7 @@ function interface.setup_machine()
 	machine:ioport().ports[":KEY"]:field(0x80):set_value(0)
 	emu.wait(2)
 
-	interface.cur_level = ""
+	interface.cur_level = "a2"
 	interface.setlevel()
 end
 
@@ -51,13 +48,13 @@ function interface.is_selected(x, y)
 	local d1 = machine:outputs():get_value("digit2") & 0x7f
 	local d2 = machine:outputs():get_value("digit1") & 0x7f
 	local d3 = machine:outputs():get_value("digit0") & 0x7f
-	local xval = machine:outputs():get_indexed_value("led1", x - 1) ~= 0
-	local yval = machine:outputs():get_indexed_value("led2", y - 1) ~= 0
+	local xval = machine:outputs():get_indexed_value("1.", x - 1) ~= 0
+	local yval = machine:outputs():get_indexed_value("2.", y - 1) ~= 0
 	return (xvals[x] == d0 and yvals[y] == d1) or (xvals[x] == d2 and yvals[y] == d3) or (xval and yval)
 end
 
 function interface.select_piece(x, y, event)
-	sb_select_piece(":board:board", 1, x, y, event)
+	sb_select_piece(":board", 1, x, y, event)
 end
 
 function interface.get_options()
@@ -88,13 +85,13 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
-	sb_promote(":board:board", x, y, piece)
+	sb_promote(":board", x, y, piece)
 	if     (piece == "q") then	send_input(":KEY", 0x10, 1)
 	elseif (piece == "r") then	send_input(":KEY", 0x08, 1)
 	elseif (piece == "b") then	send_input(":KEY", 0x04, 1)
 	elseif (piece == "n") then	send_input(":KEY", 0x02, 1)
 	elseif (piece == "Q" or piece == "R" or piece == "B" or piece == "N") then
-		sb_press_square(":board:board", 1, x, y)
+		sb_press_square(":board", 1, x, y)
 	end
 end
 

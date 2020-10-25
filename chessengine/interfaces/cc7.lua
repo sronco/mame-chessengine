@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -23,7 +20,7 @@ end
 function interface.setup_machine()
 	interface.turn = true
 	interface.invert = false
-	send_input(":IN.1", 0x01, 1) -- CL
+	send_input(":IN.3", 0x01, 1) -- RE
 	emu.wait(1.0)
 
 	interface.cur_level = 1
@@ -32,17 +29,34 @@ end
 
 function interface.start_play(init)
 	if (init) then
-		interface.invert = true
 		interface.turn = false
+		interface.invert = true
+		send_input(":IN.2", 0x01, 0.5) -- CB
+	elseif (interface.invert) then
+		local col
+		if (machine:outputs():get_value("digit0") == 0x5e) then
+			col = 4 -- d2d4
+		else
+			col = 5 -- e2e4
+		end
+		interface.setup_machine()
+		interface.turn = false
+		interface.send_pos(col)
+		interface.send_pos(2)
+		interface.send_pos(col)
+		interface.send_pos(4)
 		send_input(":IN.0", 0x01, 1) -- EN
+	else
+		interface.turn = false
+		send_input(":IN.2", 0x02, 0.5) -- DM
+		send_input(":IN.1", 0x02, 0.5) -- PB
 	end
 end
 
+function interface.stop_play()
+end
+
 function interface.is_selected(x, y)
-	if (interface.invert) then
-		x = 9 - x
-		y = 9 - y
-	end
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x6f, 0x76 }
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
 	local d0 = machine:outputs():get_value("digit0")
@@ -53,22 +67,18 @@ function interface.is_selected(x, y)
 end
 
 function interface.send_pos(p)
-	if     (p == 1)	then	send_input(":IN.3", 0x04, 1)
-	elseif (p == 2)	then	send_input(":IN.2", 0x04, 1)
-	elseif (p == 3)	then	send_input(":IN.1", 0x04, 1)
-	elseif (p == 4)	then	send_input(":IN.0", 0x04, 1)
-	elseif (p == 5)	then	send_input(":IN.3", 0x08, 1)
-	elseif (p == 6)	then	send_input(":IN.2", 0x08, 1)
-	elseif (p == 7)	then	send_input(":IN.1", 0x08, 1)
-	elseif (p == 8)	then	send_input(":IN.0", 0x08, 1)
+	if     (p == 1)	then	send_input(":IN.3", 0x04, 0.5)
+	elseif (p == 2)	then	send_input(":IN.2", 0x04, 0.5)
+	elseif (p == 3)	then	send_input(":IN.1", 0x04, 0.5)
+	elseif (p == 4)	then	send_input(":IN.0", 0x04, 0.5)
+	elseif (p == 5)	then	send_input(":IN.3", 0x08, 0.5)
+	elseif (p == 6)	then	send_input(":IN.2", 0x08, 0.5)
+	elseif (p == 7)	then	send_input(":IN.1", 0x08, 0.5)
+	elseif (p == 8)	then	send_input(":IN.0", 0x08, 0.5)
 	end
 end
 
 function interface.select_piece(x, y, event)
-	if (interface.invert) then
-		x = 9 - x
-		y = 9 - y
-	end
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
 		if (interface.turn) then
 			interface.send_pos(x)
@@ -77,6 +87,7 @@ function interface.select_piece(x, y, event)
 
 		if (event == "put") then
 			if (interface.turn) then
+				interface.invert = false
 				send_input(":IN.0", 0x01, 1) -- EN
 			end
 			interface.turn = not interface.turn

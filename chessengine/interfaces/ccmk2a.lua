@@ -1,7 +1,4 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
-interface = load_interface("chmate")
+interface = load_interface("ccmk2")
 
 function interface.send_pos2(p)  -- "1" to "8" keys
 	if     (p == 1)	then	send_input(":IN.0", 0x20, 0.5)

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = load_interface("chessmst")
 
 interface.level = 0
@@ -29,6 +26,10 @@ function interface.setup_machine()
 end
 
 function interface.start_play(init)
+	send_input(":BUTTONS", 0x80, 1) -- Enter
+end
+
+function interface.stop_play()
 	send_input(":BUTTONS", 0x80, 1) -- Enter
 end
 

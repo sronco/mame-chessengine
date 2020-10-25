@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.invert = false
@@ -17,7 +14,7 @@ function interface.setlevel()
 	if (x > 5) then
 		return
 	end
-	local y = tostring(tonumber(interface.level:sub(2, 2)))
+	local y = interface.level:sub(2, 2)
 	send_input(":KEY.1", 0x20, 1) -- LEV
 	emu.wait(0.5)
 	sb_press_square(":board:board", 1, x, y)
@@ -60,7 +57,6 @@ function interface.select_piece(x, y, event)
 		x = 9 - x
 		y = 9 - y
 	end
-
 	sb_select_piece(":board:board", 1, x, y, event)
 end
 
@@ -99,6 +95,10 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
+	if interface.invert then
+		x = 9 - x
+		y = 9 - y
+	end
 	sb_promote(":board:board", x, y, piece)
 	if     (piece == "q") then	send_input(":KEY.0", 0x10, 1)
 	elseif (piece == "r") then	send_input(":KEY.0", 0x08, 1)

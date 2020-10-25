@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.invert = false
@@ -101,6 +98,10 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
+	if interface.invert then
+		x = 9 - x
+		y = 9 - y
+	end
 	sb_promote(":board:board", x, y, piece)
 	if     (piece == "q") then	send_input(":KEY.1", 0x10, 1)
 	elseif (piece == "r") then	send_input(":KEY.1", 0x08, 1)

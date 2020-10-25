@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -34,6 +31,10 @@ end
 function interface.start_play(init)
 	interface.turn = false
 	send_input(":IN.1", 0x01, 0.5) -- STA
+end
+
+function interface.stop_play()
+	send_input(":IN.0", 0x04, 0.5) -- ENT
 end
 
 function interface.is_selected(x, y)
@@ -80,8 +81,11 @@ end
 
 function interface.set_option(name, value)
 	if (name == "level" and value ~= "") then
-		interface.level = value
-		interface.setlevel()
+		local level = value:match("^%s*(.-)%s*$"):gsub("%s%s+"," "):lower() -- trim
+		if (level:match("^[a-h][1-8]$")) then
+			interface.level = level
+			interface.setlevel()
+		end
 	end
 end
 

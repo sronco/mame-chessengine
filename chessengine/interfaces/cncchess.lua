@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -176,6 +173,10 @@ function interface.promote(x, y, piece)
 		elseif (piece == "r") then	send_input(":IN.2", 0x04, 0.5)
 		elseif (piece == "b") then	send_input(":IN.2", 0x01, 0.5)
 		elseif (piece == "n") then	send_input(":IN.2", 0x02, 0.5)
+		end
+		if (interface.invert) then
+--			x = 9 - x
+			y = 9 - y
 		end
 		interface.send_pos(x, y)
 		send_input(":IN.3", 0x01, 0.5) -- GO

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 1
@@ -11,10 +8,10 @@ function interface.setlevel()
 		return
 	end
 	interface.cur_level = interface.level
-	local lcd_num = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67, 0x3f }
+	local lcd_num = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f }
 	repeat
-		send_input(":IN.0", 0x40, 1) -- Level
-	until machine:outputs():get_value("digit3") == lcd_num[interface.level]
+		send_input(":IN.0", 0x40, 0.5) -- Level
+	until machine:outputs():get_value("digit3") == lcd_num[interface.level + 1]
 	send_input(":IN.0", 0x01, 1) -- Analysis
 end
 
@@ -48,7 +45,7 @@ end
 function interface.set_option(name, value)
 	if (name == "level") then
 		local level = tonumber(value)
-		if (level < 1 or level > 8) then
+		if (level < 0 or level > 9) then
 			return
 		end
 		interface.level = level

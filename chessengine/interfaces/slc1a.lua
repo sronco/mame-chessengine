@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -42,14 +39,14 @@ function interface.is_selected(x, y)
 end
 
 function interface.send_pos(p)
-	if     (p == 1)	then	send_input(":LINE4", 0x20, 1)
-	elseif (p == 2)	then	send_input(":LINE2", 0x20, 1)
-	elseif (p == 3)	then	send_input(":LINE3", 0x20, 1)
-	elseif (p == 4)	then	send_input(":LINE1", 0x80, 1)
-	elseif (p == 5)	then	send_input(":LINE4", 0x80, 1)
-	elseif (p == 6)	then	send_input(":LINE2", 0x80, 1)
-	elseif (p == 7)	then	send_input(":LINE3", 0x80, 1)
-	elseif (p == 8)	then	send_input(":LINE5", 0x20, 1)
+	if     (p == 1)	then	send_input(":LINE4", 0x20, 0.5)
+	elseif (p == 2)	then	send_input(":LINE2", 0x20, 0.5)
+	elseif (p == 3)	then	send_input(":LINE3", 0x20, 0.5)
+	elseif (p == 4)	then	send_input(":LINE1", 0x80, 0.5)
+	elseif (p == 5)	then	send_input(":LINE4", 0x80, 0.5)
+	elseif (p == 6)	then	send_input(":LINE2", 0x80, 0.5)
+	elseif (p == 7)	then	send_input(":LINE3", 0x80, 0.5)
+	elseif (p == 8)	then	send_input(":LINE5", 0x20, 0.5)
 	end
 end
 

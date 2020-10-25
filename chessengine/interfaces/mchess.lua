@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -67,10 +64,10 @@ function interface.is_pos_selected(x, y, piece)
 	elseif (y == 8 and (x == 1 or x == 4) and (interface.selected[8*10+5] == -1 and interface.selected[8*10+3] == 0 and interface.selected[8*10+1] == -3)) then	return false	-- black queenside castling
 
 	-- ignore en-passant capture
-	elseif (y == 5 and x < 8 and piece_id == -6 and interface.selected[(y+1)*10+x] == 0 and interface.selected[y*10+(x+1)] ==  6) then 	return false	-- white en passant
-	elseif (y == 5 and x > 1 and piece_id == -6 and interface.selected[(y+1)*10+x] == 0 and interface.selected[y*10+(x-1)] ==  6) then 	return false	-- white en passant
-	elseif (y == 4 and x < 8 and piece_id ==  6 and interface.selected[(y-1)*10+x] == 0 and interface.selected[y*10+(x+1)] == -6) then 	return false	-- black en passant
-	elseif (y == 4 and x > 1 and piece_id ==  6 and interface.selected[(y-1)*10+x] == 0 and interface.selected[y*10+(x-1)] == -6) then 	return false	-- black en passant
+	elseif (y == 5 and x < 8 and piece_id == -6 and interface.selected[(y+1)*10+x] == 0 and interface.selected[y*10+(x+1)] ==  6) then	return false	-- white en passant
+	elseif (y == 5 and x > 1 and piece_id == -6 and interface.selected[(y+1)*10+x] == 0 and interface.selected[y*10+(x-1)] ==  6) then	return false	-- white en passant
+	elseif (y == 4 and x < 8 and piece_id ==  6 and interface.selected[(y-1)*10+x] == 0 and interface.selected[y*10+(x+1)] == -6) then	return false	-- black en passant
+	elseif (y == 4 and x > 1 and piece_id ==  6 and interface.selected[(y-1)*10+x] == 0 and interface.selected[y*10+(x-1)] == -6) then	return false	-- black en passant
 	end
 
 	if (x == 1 and y == 1) then
@@ -114,33 +111,33 @@ function interface.select_piece(x, y, event)
 	if (interface.turn) then
 		if (event == "get" or event == "put") then
 			if (event == "get") then
-				send_input(":IN.1", 0x08, 0.75) -- LEFT
+				send_input(":IN.1", 0x08, 0.7) -- LEFT
 			end
 
 			while x < interface.cursor.x do
 				interface.cursor.x = interface.cursor.x - 1
-				send_input(":IN.1", 0x08, 0.75) -- LEFT
+				send_input(":IN.1", 0x08, 0.7) -- LEFT
 			end
 
 			while x > interface.cursor.x do
 				interface.cursor.x = interface.cursor.x + 1
-				send_input(":IN.1", 0x04, 0.75) -- RIGHT
+				send_input(":IN.1", 0x04, 0.7) -- RIGHT
 			end
 
 			while y < interface.cursor.y do
 				interface.cursor.y = interface.cursor.y - 1
-				send_input(":IN.1", 0x80, 0.75) -- DOWN
+				send_input(":IN.1", 0x80, 0.7) -- DOWN
 			end
 
 			while y > interface.cursor.y do
 				interface.cursor.y = interface.cursor.y + 1
-				send_input(":IN.1", 0x10, 0.75) -- UP
+				send_input(":IN.1", 0x10, 0.7) -- UP
 			end
 
 			if (event == "get") then
-				send_input(":IN.1", 0x02, 0.75) -- MOVE
+				send_input(":IN.1", 0x02, 0.7) -- MOVE
 			else
-				send_input(":IN.2", 0x02, 0.75) -- ENTER
+				send_input(":IN.2", 0x02, 0.7) -- ENTER
 				emu.wait(1)
 			end
 		end

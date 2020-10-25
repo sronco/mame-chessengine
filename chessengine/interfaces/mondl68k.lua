@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 2
@@ -41,8 +38,8 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("led", 8 + (x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("led", (y - 1)) ~= 0
+	local xval = machine:outputs():get_indexed_value("0.", (x - 1)) ~= 0
+	local yval = machine:outputs():get_indexed_value("1.", (y - 1)) ~= 0
 	return xval and yval
 end
 

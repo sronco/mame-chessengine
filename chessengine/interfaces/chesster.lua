@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -14,7 +11,7 @@ function interface.setlevel()
 	interface.cur_level = interface.level
 	local cols_idx = { a=1, b=2, c=3, d=4, e=5, f=6, g=7, h=8 }
 	local x = cols_idx[interface.level:sub(1, 1)]
-	local y = tostring(tonumber(interface.level:sub(2, 2)))
+	local y = interface.level:sub(2, 2)
 	send_input(":IN.0", 0x10, 1)  -- LEVEL
 	emu.wait(0.5)
 	sb_press_square(":board", 1, x, y)

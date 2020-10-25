@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = "a3"
@@ -11,12 +8,23 @@ function interface.setlevel()
 		return
 	end
 	interface.cur_level = interface.level
+	local level = interface.level
 	local cols_idx = { a=1, b=2, c=3, d=4, e=5, f=6, g=7, h=8 }
-	local x = cols_idx[interface.level:sub(1, 1)]
-	local y = tonumber(interface.level:sub(2, 2))
 	send_input(":IN.6", 0x01, 0.5) -- LEV
-	interface.send_pos(x)
-	interface.send_pos(y)
+	for i=1,level:len() do
+		local c = level:sub(i,i)
+		if (c:match("[a-h]")) then
+			interface.send_pos(cols_idx[c])
+		elseif (c:match("[1-8]")) then
+			interface.send_pos(tonumber(c))
+		elseif (c == "0") then
+			send_input(":IN.4", 0x02, 0.5) -- 0
+		elseif (c == "9") then
+			send_input(":IN.2", 0x02, 0.5) -- 9
+		elseif (c == " ") then
+			send_input(":IN.2", 0x01, 0.5) -- ENT
+		end
+	end
 	send_input(":IN.2", 0x01, 0.5) -- ENT
 end
 
@@ -68,8 +76,12 @@ end
 
 function interface.set_option(name, value)
 	if (name == "level" and value ~= "") then
-		interface.level = value
-		interface.setlevel()
+		local level = value:match("^%s*(.-)%s*$"):gsub("%s%s+"," "):lower() -- trim
+		if (level:match("^[a-d][1-7]$") or level:match("^[ef][1-8]$") or level:match("^[gh][2-8]$")
+		or  level:match("^[a-d]8%s%d%d:?%d%d?$")) then
+			interface.level = level
+			interface.setlevel()
+		end
 	end
 end
 

@@ -1,7 +1,5 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
+
 interface.invert = false
 interface.level = "a1"
 interface.cur_level = nil
@@ -13,36 +11,44 @@ function interface.setlevel()
 	interface.cur_level = interface.level
 	local cols_idx = { a=1, b=2, c=3, d=4, e=5, f=6, g=7, h=8 }
 	local x = cols_idx[interface.level:sub(1, 1)]
-	local y = tostring(tonumber(interface.level:sub(2, 2)))
+	local y = tonumber(interface.level:sub(2, 2))
+
 	send_input(":IN.0", 0x02, 1)  -- Level
 	emu.wait(0.5)
-
 	local invert = interface.invert
 	interface.invert = false
-	local clevx = -1
-	local clevy = -1
-	for cy=1,8 do
-		for cx=1,8 do
+
+	local clevx = 0
+	local clevy = 0
+	for cx=1,8 do
+		for cy=1,8 do
 			if (interface.is_selected(cx, cy)) then
 				clevx = cx
 				clevy = cy
-				break
+				cx = 8
+				cy = 8
 			end
 		end
 	end
-	if (clevx < 0 or clevy < 0) or (clevx == x and clevy == y) then
-		return
-	end
-
-	repeat
-		if not interface.is_selected(x, y) then
-			if (clevx * 8 + clevy < x * 8 + y) then
+	if (clevx > 0 and clevy > 0) and (clevx ~= x or clevy ~= y) then
+		local dlev = (x * 8 + y) - (clevx * 8 + clevy)
+		local dx = (x - clevx + 8) % 8
+		local dy = y - clevy
+		if (dlev >= -7 and  dlev <= 4) then
+			dx = 0
+			dy = dlev
+		end
+		for i=1,dx do
+			send_input(":IN.4", 0x02, 1) -- Tab
+		end
+		for i=1,math.abs(dy) do
+			if (dy > 0) then
 				send_input(":IN.5", 0x01, 1) -- +
 			else
 				send_input(":IN.4", 0x04, 1) -- -
 			end
 		end
-	until interface.is_selected(x, y)
+	end
 
 	interface.invert = invert
 	emu.wait(0.5)
@@ -52,11 +58,11 @@ end
 function interface.setup_machine()
 	sb_reset_board(":board")
 	interface.invert = false
-	emu.wait(15)
+	emu.wait(4)
 	send_input(":IN.1", 0x04, 1)	-- New Game
 	emu.wait(1)
 
-	interface.cur_level = ""
+	interface.cur_level = "a1"
 	interface.setlevel()
 end
 
@@ -108,9 +114,20 @@ function interface.get_promotion(x, y)
 	return nil
 end
 
+function interface.promote_special(piece)
+	if     (piece=="q") then send_input(":IN.3", 0x01, 1) 
+	elseif (piece=="r") then send_input(":IN.2", 0x01, 1) 
+	elseif (piece=="b") then send_input(":IN.2", 0x04, 1) 
+	elseif (piece=="n") then send_input(":IN.3", 0x02, 1) 
+	end
+end
+
 function interface.promote(x, y, piece)
+	if interface.invert then
+		x = 9 - x
+		y = 9 - y
+	end
 	sb_promote(":board", x, y, piece)
-	-- TODO
 end
 
 return interface

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -22,7 +19,6 @@ function interface.setlevel()
 end
 
 function interface.setup_machine()
-	sb_reset_board(":board")
 	interface.turn = true
 	send_input(":IN.3", 0x01, 1) -- CE
 	emu.wait(1.0)
@@ -47,19 +43,18 @@ function interface.is_selected(x, y)
 end
 
 function interface.send_pos(p)
-	if     (p == 1)	then	send_input(":IN.0", 0x01, 1)
-	elseif (p == 2)	then	send_input(":IN.0", 0x02, 1)
-	elseif (p == 3)	then	send_input(":IN.0", 0x04, 1)
-	elseif (p == 4)	then	send_input(":IN.0", 0x08, 1)
-	elseif (p == 5)	then	send_input(":IN.1", 0x01, 1)
-	elseif (p == 6)	then	send_input(":IN.1", 0x02, 1)
-	elseif (p == 7)	then	send_input(":IN.1", 0x04, 1)
-	elseif (p == 8)	then	send_input(":IN.1", 0x08, 1)
+	if     (p == 1)	then	send_input(":IN.0", 0x01, 0.5)
+	elseif (p == 2)	then	send_input(":IN.0", 0x02, 0.5)
+	elseif (p == 3)	then	send_input(":IN.0", 0x04, 0.5)
+	elseif (p == 4)	then	send_input(":IN.0", 0x08, 0.5)
+	elseif (p == 5)	then	send_input(":IN.1", 0x01, 0.5)
+	elseif (p == 6)	then	send_input(":IN.1", 0x02, 0.5)
+	elseif (p == 7)	then	send_input(":IN.1", 0x04, 0.5)
+	elseif (p == 8)	then	send_input(":IN.1", 0x08, 0.5)
 	end
 end
 
 function interface.select_piece(x, y, event)
-	sb_select_piece(":board", 0.09, x, y, event)
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
 		if (interface.turn) then
 			interface.send_pos(x)
@@ -101,7 +96,6 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
-	sb_promote(":board", x, y, piece)
 	-- TODO
 end
 

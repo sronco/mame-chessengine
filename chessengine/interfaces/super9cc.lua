@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -17,8 +14,7 @@ function interface.setlevel()
 	if (x > 2) then
 		return
 	end
-	x = tostring(x)
-	local y = tonumber(interface.level:sub(2, 2))
+	local y = interface.level:sub(2, 2)
 	send_input(":IN.8", 0x08, 1)  -- LV
 	emu.wait(0.5)
 	sb_press_square(":board", 1, x, y)

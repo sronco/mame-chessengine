@@ -1,41 +1,45 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
-interface.level = 2
+interface.level = "2"
 interface.cur_level = nil
+
+function interface.setdigit(n)
+	if     (n == 0) then send_input(":LINE1", 0x04, 0.25)
+	elseif (n == 1) then send_input(":LINE0", 0x20, 0.25)
+	elseif (n == 2) then send_input(":LINE0", 0x80, 0.25)
+	elseif (n == 3) then send_input(":LINE0", 0x04, 0.25)
+	elseif (n == 4) then send_input(":LINE0", 0x10, 0.25)
+	elseif (n == 5) then send_input(":LINE1", 0x01, 0.25)
+	elseif (n == 6) then send_input(":LINE0", 0x40, 0.25)
+	elseif (n == 7) then send_input(":LINE1", 0x40, 0.25)
+	elseif (n == 8) then send_input(":LINE1", 0x10, 0.25)
+	elseif (n == 9) then send_input(":LINE0", 0x01, 0.25)
+	end
+end
 
 function interface.setlevel()
 	if (interface.cur_level == nil or interface.cur_level == interface.level) then
 		return
 	end
 	interface.cur_level = interface.level
-	if (interface.level == 7 or interface.level == 8) then
-		return
+	local level = interface.level
+	send_input(":LINE1", 0x20, 0.25) -- LEV
+	for i=1,level:len() do
+		local n = level:sub(i,i)
+		if (n == " " or n == ":") then
+			send_input(":LINE0", 0x08, 0.25) -- ENT
+		else
+			interface.setdigit(tonumber(n))
+		end
 	end
-	send_input(":LINE1", 0x20, 1) -- LEV
-	if     (interface.level == 0) then	send_input(":LINE1", 0x04, 1)
-	elseif (interface.level == 1) then	send_input(":LINE0", 0x20, 1)
-	elseif (interface.level == 2) then	send_input(":LINE0", 0x80, 1)
-	elseif (interface.level == 3) then	send_input(":LINE0", 0x04, 1)
-	elseif (interface.level == 4) then	send_input(":LINE0", 0x10, 1)
-	elseif (interface.level == 5) then	send_input(":LINE1", 0x01, 1)
-	elseif (interface.level == 6) then	send_input(":LINE0", 0x40, 1)
-	elseif (interface.level == 7) then	send_input(":LINE1", 0x40, 1)
-	elseif (interface.level == 8) then	send_input(":LINE1", 0x10, 1)
-	elseif (interface.level == 9) then	send_input(":LINE0", 0x01, 1)
-	end
-	send_input(":LINE0", 0x08, 1) -- ENT
+	send_input(":LINE0", 0x08, 0.25) -- ENT
 end
 
 function interface.setup_machine()
 	sb_reset_board(":board:board")
 	emu.wait(1.0)
---	send_input(":LINE0", 0x02, 1) -- CLR
---	emu.wait(1.0)
 
-	interface.cur_level = 2
+	interface.cur_level = "2"
 	interface.setlevel()
 end
 
@@ -58,17 +62,16 @@ function interface.select_piece(x, y, event)
 end
 
 function interface.get_options()
-	return { { "spin", "Level", "2", "0", "6"}, }
+	return { { "string", "Level", "2"}, }
 end
 
 function interface.set_option(name, value)
 	if (name == "level") then
-		local level = tonumber(value)
-		if (level < 0 or level > 6) then
-			return
+		local level = value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ") -- trim
+		if (string.match(level,"^[0-69]$") or string.match(level,"^[78]%s%d%d:[0-5]%d:[0-5]%d$")) then
+			interface.level = level
+			interface.setlevel()
 		end
-		interface.level = level
-		interface.setlevel()
 	end
 end
 

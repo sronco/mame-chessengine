@@ -220,6 +220,9 @@ local function make_move(move, reason, promotion)
 			interface.select_piece(from.x, from.y, "get" .. reason)
 			emu.wait(0.5)
 		end
+		if (move:len() >= 5) and interface.promote_special then
+			interface.promote_special(move:sub(move:len())) -- some engines need at promotion the piece between from and to!
+		end
 		if board[to.y][to.x] ~= 0 then
 			interface.select_piece(to.x, to.y, "capture")
 		end
@@ -418,6 +421,12 @@ local function set_option(name, value)
 end
 
 local function execute_uci_command(cmd)
+	if cmd:match("^position fen") ~= nil then
+		local m = cmd:find("moves")
+		if m ~= nil then
+                        cmd = "position startpos " .. cmd:sub(m)
+		end
+	end
 	if cmd == "uci" then
 		protocol = cmd
 		send_cmd("id name " .. describe_system())

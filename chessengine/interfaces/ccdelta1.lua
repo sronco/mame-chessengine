@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -66,7 +63,7 @@ end
 
 function interface.is_selected(x, y)
 	if (interface.is_selected_int(x, y)) then
-		emu.wait(0.5)
+		emu.wait(0.4)
 		return interface.is_selected_int(x, y)
 	end
 

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.turn = true
@@ -44,6 +41,9 @@ function interface.start_play(init)
 		send_input(":IN.1", 0x01, 0.5) -- EN
 		emu.wait(0.5)
 	end
+end
+
+function interface.stop_play()
 end
 
 function interface.is_selected(x, y)

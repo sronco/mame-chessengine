@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = {}
 
 interface.level = 1
@@ -26,6 +23,10 @@ end
 
 function interface.start_play(init)
 	send_input(":BUTTONS", 0x20, 1) -- Color
+end
+
+function interface.stop_play()
+	send_input(":EXTRA", 0x01, 1) -- Halt
 end
 
 function interface.is_selected(x, y)

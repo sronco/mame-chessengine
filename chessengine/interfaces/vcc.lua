@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = load_interface("cc10")
 
 function interface.setlevel()
@@ -13,6 +10,13 @@ function interface.setlevel()
 		send_input(":IN.0", 0x02, 0.5) -- LV
 	until machine:outputs():get_value("digit3") == lcd_num[interface.level]
 	send_input(":IN.2", 0x01, 0.5) -- CL
+end
+
+function interface.start_play(init)
+	interface.turn = false
+	send_input(":IN.2", 0x01, 0.5) -- CL
+	send_input(":IN.1", 0x02, 0.5) -- DM
+	send_input(":IN.2", 0x02, 0.5) -- PB
 end
 
 return interface

@@ -1,6 +1,3 @@
--- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
-
 interface = load_interface("megaiv")
 
 interface.level = "a2"
@@ -16,7 +13,7 @@ function interface.setlevel()
 	if (x > 6) then
 		return
 	end
-	local y = tostring(tonumber(interface.level:sub(2, 2)))
+	local y = interface.level:sub(2, 2)
 	send_input(":KEY.1", 0x08, 1)  -- LEV
 	emu.wait(0.5)
 	sb_press_square(":board:board", 1, x, y)
