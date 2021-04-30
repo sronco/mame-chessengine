@@ -1,12 +1,17 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "010 sec/move"
 interface.cur_level = nil
 interface.levelnum = 1
+interface.style = "normal"
+interface.cur_style = nil
+interface.stylenum = 3
 
-function setdigits(n)
+local function setdigits(n)
 	local dram = emu.item(machine.devices[':ram'].items['0/m_pointer'])
-	send_input(":P1", 0x80000000, 0.2) -- Enter
+	send_input(":IN.1", 0x80, 0.2) -- Enter
 	for i=1,n do
 		if (n == 7 and (i == 3 or i == 5)) then
 			-- skip char
@@ -27,13 +32,13 @@ function setdigits(n)
 			end
 			for j=1,math.abs(k) do
 				if (k > 0) then
-					send_input(":P3", 0x80000000, 0.2) -- Up
+					send_input(":IN.3", 0x80, 0.2) -- Up
 				else
-					send_input(":P2", 0x80000000, 0.2) -- Down
+					send_input(":IN.2", 0x80, 0.2) -- Down
 				end
 			end
 			if (i < n) then
-				send_input(":P6", 0x40000000, 0.2) -- Right
+				send_input(":IN.6", 0x40, 0.2) -- Right
 			end
 		end
 	end
@@ -43,11 +48,11 @@ function interface.setlevel()
 	if (interface.cur_level == nil or interface.cur_level == interface.level or interface.levelnum == 0) then
 		return
 	end
-	send_input(":P4", 0x80000000, 0.2) -- Menu
-	send_input(":P2", 0x80000000, 0.2) -- Down
-	send_input(":P2", 0x80000000, 0.2) -- Down
-	send_input(":P1", 0x80000000, 0.2) -- Enter
-	send_input(":P1", 0x80000000, 0.2) -- Enter
+	send_input(":IN.4", 0x80, 0.2) -- Menu
+	send_input(":IN.2", 0x80, 0.2) -- Down
+	send_input(":IN.2", 0x80, 0.2) -- Down
+	send_input(":IN.1", 0x80, 0.2) -- Enter
+	send_input(":IN.1", 0x80, 0.2) -- Enter
 	local dram = emu.item(machine.devices[':ram'].items['0/m_pointer'])
 	local s = ""
 	local b = 0
@@ -68,7 +73,7 @@ function interface.setlevel()
 	elseif (string.match(s,"analysis") or string.match(s,"Analyse")) then curnum = 6
 	end
 	if (curnum == 0) then
-		send_input(":P4", 0x80000000, 0.2) -- Menu
+		send_input(":IN.4", 0x80, 0.2) -- Menu
 		return
 	end
 	interface.cur_level = interface.level
@@ -80,9 +85,9 @@ function interface.setlevel()
 	end
 	for i=1,math.abs(k) do
 		if (k > 0) then
-			send_input(":P2", 0x80000000, 0.2) -- Down
+			send_input(":IN.2", 0x80, 0.2) -- Down
 		else
-			send_input(":P3", 0x80000000, 0.2) -- Up
+			send_input(":IN.3", 0x80, 0.2) -- Up
 		end
 	end
 	if     (interface.levelnum == 1) then setdigits(3)
@@ -92,8 +97,58 @@ function interface.setlevel()
 	elseif (interface.levelnum == 5) then setdigits(2)
 	elseif (interface.levelnum == 6) then -- nothing to do
 	end
-	send_input(":P1", 0x80000000, 0.2) -- Enter
-	send_input(":P4", 0x80000000, 0.2) -- Menu
+	send_input(":IN.1", 0x80, 0.2) -- Enter
+	send_input(":IN.4", 0x80, 0.2) -- Menu
+end
+
+function interface.setstyle()
+	if (interface.cur_style == nil or interface.cur_style == interface.style or interface.stylenum == 0) then
+		return
+	end
+	send_input(":IN.4", 0x80, 0.2) -- Menu
+	send_input(":IN.2", 0x80, 0.2) -- Down
+	send_input(":IN.1", 0x80, 0.2) -- Enter
+	send_input(":IN.2", 0x80, 0.2) -- Down
+	send_input(":IN.2", 0x80, 0.2) -- Down
+	send_input(":IN.1", 0x80, 0.2) -- Enter
+	local dram = emu.item(machine.devices[':ram'].items['0/m_pointer'])
+	local s = ""
+	local b = 0
+	local i = 1
+	repeat
+		b = dram:read(0xec1 + i)
+		if (b ~= 0x00) then
+			s = s .. string.char(b)
+			i = i + 1
+		end
+	until (b == 0x00)
+	local curnum = 0
+	if     (string.match(s,"defensive") or string.match(s,"Defensive")) then curnum = 1
+	elseif (string.match(s,"solid") or string.match(s,"Solid")) then curnum = 2
+	elseif (string.match(s,"normal") or string.match(s,"Normal")) then curnum = 3
+	elseif (string.match(s,"active") or string.match(s,"Aktiv")) then curnum = 4
+	elseif (string.match(s,"offensive") or string.match(s,"Offensiv")) then curnum = 5
+	end
+	if (curnum == 0) then
+		send_input(":IN.4", 0x80, 0.2) -- Menu
+		return
+	end
+	interface.cur_style = interface.style
+	local k = interface.stylenum - curnum
+	if (k > 2) then
+		k = k - 5
+	elseif (k < -2) then
+		k = k + 5
+	end
+	for i=1,math.abs(k) do
+		if (k > 0) then
+			send_input(":IN.2", 0x80, 0.2) -- Down
+		else
+			send_input(":IN.3", 0x80, 0.2) -- Up
+		end
+	end
+	send_input(":IN.1", 0x80, 0.2) -- Enter
+	send_input(":IN.4", 0x80, 0.2) -- Menu
 end
 
 function interface.setup_machine()
@@ -102,15 +157,17 @@ function interface.setup_machine()
 
 	interface.cur_level = ""
 	interface.setlevel()
+	interface.cur_style = ""
+	interface.setstyle()
 end
 
 function interface.start_play(init)
-	send_input(":P5", 0x80000000, 1)
+	send_input(":IN.5", 0x80, 1)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("led", 8 + (x - 1)) == 0
-	local yval = machine:outputs():get_indexed_value("led", (y - 1)) == 0
+	local xval = output:get_indexed_value("led", 8 + (x - 1)) ~= 0
+	local yval = output:get_indexed_value("led", (y - 1)) ~= 0
 	return xval and yval
 end
 
@@ -119,7 +176,7 @@ function interface.select_piece(x, y, event)
 end
 
 function interface.get_options()
-	return { { "string", "Level", "10 sec/move"}, }
+	return { { "string", "Level", "10 sec/move"}, { "combo", "Style", "normal", "defensive\tsolid\tnormal\tactive\toffensive"}, }
 end
 
 function interface.set_option(name, value)
@@ -157,11 +214,29 @@ function interface.set_option(name, value)
 			interface.level = value
 			interface.setlevel()
 		end
+	elseif (name == "style" and value ~= "") then
+		local temp = string.upper(value)
+		interface.stylenum = 0
+		if (temp == "DEFENSIVE") then
+			interface.stylenum = 1
+		elseif (temp == "SOLID") then
+			interface.stylenum = 2
+		elseif (temp == "NORMAL") then
+			interface.stylenum = 3
+		elseif (temp == "ACTIVE") then
+			interface.stylenum = 4
+		elseif (temp == "OFFENSIVE") then
+			interface.stylenum = 5
+		end
+		if (interface.stylenum ~= 0) then
+			interface.style = value
+			interface.setstyle()
+		end
 	end
 end
 
 function interface.get_promotion(x, y)
-	local ddram = emu.item(machine.devices[':maincpu']:owner().items['0/m_vram']):read_block(0x00, 0x100)
+	local ddram = emu.item(machine.devices[':lcdc'].items['0/m_ddr']):read_block(0x00, 0x100)
 
 	-- LCD symbols used to represent chess pieces
 	if     (ddram:byte(5 + 1) == 0x4d and ddram:byte(5 + 2) == 0x63 and ddram:byte(5 + 3) == 0x7f and ddram:byte(5 + 4) == 0x63 and ddram:byte(5 + 5) == 0x4d) then	return 'q'
@@ -175,10 +250,10 @@ end
 
 function interface.promote(x, y, piece)
 	sb_promote(":board", x, y, piece)
-	if     (piece == "q") then	send_input(":P4", 0x40000000, 1)
-	elseif (piece == "r") then	send_input(":P3", 0x40000000, 1)
-	elseif (piece == "b") then	send_input(":P2", 0x40000000, 1)
-	elseif (piece == "n") then	send_input(":P1", 0x40000000, 1)
+	if     (piece == "q") then	send_input(":IN.4", 0x40, 1)
+	elseif (piece == "r") then	send_input(":IN.3", 0x40, 1)
+	elseif (piece == "b") then	send_input(":IN.2", 0x40, 1)
+	elseif (piece == "n") then	send_input(":IN.1", 0x40, 1)
 	end
 end
 

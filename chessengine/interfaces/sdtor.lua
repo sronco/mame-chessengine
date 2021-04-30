@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "a2"
@@ -30,7 +32,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value((y - 1) .. "." .. (x - 1)) ~= 0
+	return output:get_value((y - 1) .. "." .. (x - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -53,10 +55,10 @@ end
 
 function interface.get_promotion(x, y)
 	local new_type = nil
-	if     (machine:outputs():get_value("8.4") ~= 0) then new_type = 'q'
-	elseif (machine:outputs():get_value("8.3") ~= 0) then new_type = 'r'
-	elseif (machine:outputs():get_value("8.2") ~= 0) then new_type = 'b'
-	elseif (machine:outputs():get_value("8.1") ~= 0) then new_type = 'n'
+	if     (output:get_value("8.4") ~= 0) then new_type = 'q'
+	elseif (output:get_value("8.3") ~= 0) then new_type = 'r'
+	elseif (output:get_value("8.2") ~= 0) then new_type = 'b'
+	elseif (output:get_value("8.1") ~= 0) then new_type = 'n'
 	end
 	if (new_type ~= nil) then
 		interface.select_piece(x, y, "")

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "1"
@@ -19,11 +21,11 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	local level = interface.level
-	local nvram = emu.item(machine.devices[':nvram_map'].items['0/00000000-0000ffff'])
+	local nvram = machine.devices[':']:memshare("nvram")
 	repeat
 		send_input(":IN.0", 0x04, 0.25) -- Level
-	until nvram:read(0x01) == 0x00
-	local n = tonumber(level:sub(1,2)) - (nvram:read(0x03) + 1)
+	until nvram:read_u8(0x01) == 0x00
+	local n = tonumber(level:sub(1,2)) - (nvram:read_u8(0x03) + 1)
 	if (n > 8) then
 		n = n - 17
 	elseif (n < -8) then
@@ -37,14 +39,14 @@ function interface.setlevel()
 			send_input(":IN.0", 0x01, 0.25) -- Clock
 			k = level:find("/")
 			if (level ~= "" and k ~= nil) then
-				n = tonumber(level:sub(1,k-1)) - nvram:read(i*0x06+3)
+				n = tonumber(level:sub(1,k-1)) - nvram:read_u8(i*0x06+3)
 				interface.setvalue(n)
 				level = level:sub(k+1)
 			end
 			send_input(":IN.0", 0x01, 0.25) -- Clock
 			k = (level .. " "):find(" ")
 			if (level ~= "" and k ~= nil) then
-				n = tonumber(level:sub(1,k-1)) - (256 * (nvram:read(i*0x06)) + nvram:read(i*0x06+1)) / 60
+				n = tonumber(level:sub(1,k-1)) - (256 * (nvram:read_u8(i*0x06)) + nvram:read_u8(i*0x06+1)) / 60
 				interface.setvalue(n)
 				level = level:sub(k+1)
 			end
@@ -95,10 +97,10 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	if (machine:outputs():get_indexed_value(tostring(y - 1) .. ".", 8 - x) ~= 0) then
+	if (output:get_indexed_value(tostring(y - 1) .. ".", 8 - x) ~= 0) then
 		for i=1,2 do
 			emu.wait(0.3)
-			if (machine:outputs():get_indexed_value(tostring(y - 1) .. ".", 8 - x) == 0) then
+			if (output:get_indexed_value(tostring(y - 1) .. ".", 8 - x) == 0) then
 				return false
 			end
 		end

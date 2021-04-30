@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("sforteb")
 
 function interface.setsel()
@@ -92,8 +94,8 @@ function interface.setup_machine()
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_value(tostring(8 - x) .. ".8") ~= 0
-	local yval = machine:outputs():get_value(tostring(y - 1) .. ".9") ~= 0
+	local xval = output:get_value(tostring(8 - x) .. ".8") ~= 0
+	local yval = output:get_value(tostring(y - 1) .. ".9") ~= 0
 	return xval and yval
 end
 

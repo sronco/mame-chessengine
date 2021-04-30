@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -31,10 +33,10 @@ end
 function interface.is_selected(x, y)
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 }
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
-	local d0 = machine:outputs():get_value("digit0")
-	local d1 = machine:outputs():get_value("digit1")
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit0")
+	local d1 = output:get_value("digit1")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
 	return (xval[x] == d0 and yval[y] == d1) or (xval[x] == d2 and yval[y] == d3)
 end
 
@@ -52,7 +54,7 @@ end
 
 function interface.select_piece(x, y, event)
 	if (event ~= "capture" and event ~= "get_castling" and event ~= "put_castling" and event ~= "en_passant") then
-		machine:outputs():set_value("busyled", 0)
+		output:set_value("busyled", 0)
 		if (interface.turn) then
 			interface.send_pos(x)
 			interface.send_pos(y)
@@ -61,7 +63,7 @@ function interface.select_piece(x, y, event)
 		if (event == "put") then
 			if (interface.turn) then
 				send_input(":LINE7", 0x80, 1)
-				machine:outputs():set_value("busyled", 1)
+				output:set_value("busyled", 1)
 			end
 			interface.turn = not interface.turn
 		end

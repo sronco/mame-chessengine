@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "P2"
@@ -34,8 +36,8 @@ function interface.setup_machine()
 end
 
 function interface.start_play(init)
-	if     (machine:outputs():get_value("9.7") ~= 0) then send_input(":IN.1", 0x80, 0.5) -- Black
-	elseif (machine:outputs():get_value("9.6") ~= 0) then send_input(":IN.1", 0x40, 0.5) -- White
+	if     (output:get_value("9.7") ~= 0) then send_input(":IN.1", 0x80, 0.5) -- Black
+	elseif (output:get_value("9.6") ~= 0) then send_input(":IN.1", 0x40, 0.5) -- White
 	end
 end
 
@@ -44,12 +46,12 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_indexed_value(tostring(9 - x) .. ".", y - 1) ~= 0
+	return output:get_indexed_value(tostring(9 - x) .. ".", y - 1) ~= 0
 end
 
 function interface.select_piece(x, y, event)
 	if (event == "get") then
-		if (machine:outputs():get_value("0.1") ~= 0 and machine:outputs():get_value("0.7") ~= 0) then
+		if (output:get_value("0.1") ~= 0 and output:get_value("0.7") ~= 0) then
 			send_input(":IN.0", 0x80, 0.5) -- Continue
 			emu.wait(0.5)
 		end
@@ -79,10 +81,10 @@ end
 
 function interface.get_promotion(x, y)
 	for i=0,5 do
-		if     (machine:outputs():get_value("9.4") ~= 0) then return 'q'
-		elseif (machine:outputs():get_value("9.3") ~= 0) then return 'r'
-		elseif (machine:outputs():get_value("9.2") ~= 0) then return 'b'
-		elseif (machine:outputs():get_value("9.1") ~= 0) then return 'n'
+		if     (output:get_value("9.4") ~= 0) then return 'q'
+		elseif (output:get_value("9.3") ~= 0) then return 'r'
+		elseif (output:get_value("9.2") ~= 0) then return 'b'
+		elseif (output:get_value("9.1") ~= 0) then return 'n'
 		end
 		emu.wait(0.2)
 	end

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.invert = false
@@ -19,9 +21,9 @@ function interface.setlevel()
 	local clevx = 0
 	local clevy = 0
 	for cx=1,4 do
-		local xval = machine:outputs():get_value(tostring(cx - 1) .. ".1") ~= 0
+		local xval = output:get_value(tostring(cx - 1) .. ".1") ~= 0
 		for cy=1,8 do
-			local yval = machine:outputs():get_value(tostring(cy - 1) .. ".3") ~= 0
+			local yval = output:get_value(tostring(cy - 1) .. ".3") ~= 0
 			if (xval and yval) then
 				clevx = cx
 				clevy = cy
@@ -82,8 +84,8 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	local xval = machine:outputs():get_value(tostring(x - 1) .. ".0") ~= 0
-	local yval = machine:outputs():get_value(tostring(y - 1) .. ".2") ~= 0
+	local xval = output:get_value(tostring(x - 1) .. ".0") ~= 0
+	local yval = output:get_value(tostring(y - 1) .. ".2") ~= 0
 	return xval and yval
 end
 
@@ -110,10 +112,10 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	if     (machine:outputs():get_value("8.5") ~= 0) then return 'q'
-	elseif (machine:outputs():get_value("8.4") ~= 0) then return 'r'
-	elseif (machine:outputs():get_value("8.6") ~= 0) then return 'b'
-	elseif (machine:outputs():get_value("8.2") ~= 0) then return 'n'
+	if     (output:get_value("8.5") ~= 0) then return 'q'
+	elseif (output:get_value("8.4") ~= 0) then return 'r'
+	elseif (output:get_value("8.6") ~= 0) then return 'b'
+	elseif (output:get_value("8.2") ~= 0) then return 'n'
 	end
 	return nil
 end

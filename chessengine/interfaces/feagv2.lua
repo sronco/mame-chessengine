@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -10,10 +12,10 @@ function interface.setdigit(n,d,m)
 	if (led == 6) then
 		led = 5
 	end
-	local cd = machine:outputs():get_value("digit" .. led)
+	local cd = output:get_value("digit" .. led)
 	while (cd == 0x00) do
 		emu.wait(0.25)
-		cd = machine:outputs():get_value("digit" .. led)
+		cd = output:get_value("digit" .. led)
 	end
 	n = 0
 	while (cd ~= lcd_num[n+1]) do
@@ -75,9 +77,9 @@ end
 
 function interface.setup_machine()
 	sb_reset_board(":board")
-	emu.wait(3.0)
+	emu.wait(1)
 	send_input(":IN.1", 0x04, 1) -- New Game
-	emu.wait(1.0)
+	emu.wait(3)
 
 	interface.cur_level = "a1"
 	interface.setlevel()
@@ -88,14 +90,14 @@ function interface.start_play(init)
 end
 
 function interface.clear_announcements()
-	local d0 = machine:outputs():get_value("digit0")
-	local d1 = machine:outputs():get_value("digit1")
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
-	local d5 = machine:outputs():get_value("digit5")
-	local d6 = machine:outputs():get_value("digit6")
-	local d7 = machine:outputs():get_value("digit7")
-	local d8 = machine:outputs():get_value("digit8")
+	local d0 = output:get_value("digit0")
+	local d1 = output:get_value("digit1")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
+	local d5 = output:get_value("digit5")
+	local d6 = output:get_value("digit6")
+	local d7 = output:get_value("digit7")
+	local d8 = output:get_value("digit8")
 
 	-- clear announcements to continue the game
 	if ((d5 == 0x37 and d7 == 0x00) or (d0 == 0x37 and d2 == 0x00) or									--  'M '   = forced checkmate found in X moves
@@ -110,7 +112,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return machine:outputs():get_value((y - 1) .. "." .. (16 - x)) ~= 0
+	return output:get_value((y - 1) .. "." .. (16 - x)) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -138,10 +140,10 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion_led()
-	if     (machine:outputs():get_value("8.11") ~= 0) then	return 'q'
-	elseif (machine:outputs():get_value("8.12") ~= 0) then	return 'r'
-	elseif (machine:outputs():get_value("8.13") ~= 0) then	return 'b'
-	elseif (machine:outputs():get_value("8.14") ~= 0) then	return 'n'
+	if     (output:get_value("8.11") ~= 0) then	return 'q'
+	elseif (output:get_value("8.12") ~= 0) then	return 'r'
+	elseif (output:get_value("8.13") ~= 0) then	return 'b'
+	elseif (output:get_value("8.14") ~= 0) then	return 'n'
 	end
 	return nil
 end

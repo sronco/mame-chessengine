@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("berl32t8p")
 
 interface.level = "TURN 01"

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -49,10 +51,10 @@ end
 function interface.is_selected(x, y)
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x6f, 0x76 }
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
-	local d0 = machine:outputs():get_value("digit0")
-	local d1 = machine:outputs():get_value("digit1")
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit0")
+	local d1 = output:get_value("digit1")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
 	if (d0 == 0x3f and d1 == 0x3f and d2 == 0x3f and d3 == 0x00) then -- "000 ", computer castles queenside
 		return (interface.invert and y == 1 and (x == 5 or x == 7)) or (not interface.invert and y == 8 and (x == 5 or x == 3))
 	end

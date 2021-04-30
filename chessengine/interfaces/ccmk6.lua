@@ -1,9 +1,11 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("ccmk5")
 
 function interface.setup_machine()
 	-- Disable the Sensory Board config
-	if ((machine:ioport().ports[":IN.6"]:read() & 0x20) ~= 0) then
-		machine:ioport().ports[":IN.6"]:field(0x20):set_value(1)
+	if ((ioport.ports[":IN.6"]:read() & 0x20) ~= 0) then
+		ioport.ports[":IN.6"]:field(0x20):set_value(1)
 		machine:soft_reset()
 	end
 	interface.turn = true

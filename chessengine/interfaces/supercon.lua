@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 2
@@ -12,7 +14,7 @@ function interface.setlevel()
 		send_input(":IN.6", 0x02, 0.5) -- Set Level
 		local cur_level = 0
 		for y=0,7 do
-			if machine:outputs():get_indexed_value("1.", y) ~= 0 then
+			if output:get_indexed_value("1.", y) ~= 0 then
 				cur_level = cur_level + 1
 			end
 		end
@@ -34,7 +36,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return (machine:outputs():get_indexed_value("1.", (8 - y)) ~= 0) and (machine:outputs():get_indexed_value("2.", (x - 1)) ~= 0)
+	return (output:get_indexed_value("1.", (8 - y)) ~= 0) and (output:get_indexed_value("2.", (x - 1)) ~= 0)
 end
 
 function interface.select_piece(x, y, event)
@@ -57,10 +59,10 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion_led()
-	if     (machine:outputs():get_value("0.1") ~= 0) then	return 'q'
-	elseif (machine:outputs():get_value("0.4") ~= 0) then	return 'r'
-	elseif (machine:outputs():get_value("0.2") ~= 0) then	return 'b'
-	elseif (machine:outputs():get_value("0.3") ~= 0) then	return 'n'
+	if     (output:get_value("0.1") ~= 0) then	return 'q'
+	elseif (output:get_value("0.4") ~= 0) then	return 'r'
+	elseif (output:get_value("0.2") ~= 0) then	return 'b'
+	elseif (output:get_value("0.3") ~= 0) then	return 'n'
 	end
 	return nil
 end

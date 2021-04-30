@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -27,7 +26,7 @@ end
 
 function interface.start_play(init)
 	send_input(":IN.0", 0x20, 1) -- Change Color
-	if machine:outputs():get_value("8.1") ~= 0 then
+	if output:get_value("8.1") ~= 0 then
 		send_input(":IN.0", 0x01, 1) -- Black
 	else
 		send_input(":IN.0", 0x02, 1) -- White
@@ -39,7 +38,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value((x - 1) .. "." .. (y-1)) ~= 0
+	return output:get_value((x - 1) .. "." .. (y-1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

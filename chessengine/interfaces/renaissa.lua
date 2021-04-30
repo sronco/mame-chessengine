@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.invert = false
@@ -20,8 +22,8 @@ function interface.setlevel()
 	local clevy = 0
 	for cx=1,4 do
 		for cy=1,8 do
-			local led0 = machine:outputs():get_value(tostring(cx-1) .. "." .. tostring(cy-1)) ~= 0
-			local led3 = machine:outputs():get_value(tostring(cx) .. "." .. tostring(cy)) ~= 0
+			local led0 = output:get_value(tostring(cx-1) .. "." .. tostring(cy-1)) ~= 0
+			local led3 = output:get_value(tostring(cx) .. "." .. tostring(cy)) ~= 0
 			if (led0 and led3) then
 				clevx = cx
 				clevy = cy
@@ -82,10 +84,10 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	local led0 = machine:outputs():get_value(tostring(x-1) .. "." .. tostring(y-1)) ~= 0
-	local led1 = machine:outputs():get_value(tostring(x)   .. "." .. tostring(y-1)) ~= 0
-	local led2 = machine:outputs():get_value(tostring(x-1) .. "." .. tostring(y)) ~= 0
-	local led3 = machine:outputs():get_value(tostring(x)   .. "." .. tostring(y)) ~= 0
+	local led0 = output:get_value(tostring(x-1) .. "." .. tostring(y-1)) ~= 0
+	local led1 = output:get_value(tostring(x)   .. "." .. tostring(y-1)) ~= 0
+	local led2 = output:get_value(tostring(x-1) .. "." .. tostring(y)) ~= 0
+	local led3 = output:get_value(tostring(x)   .. "." .. tostring(y)) ~= 0
 	return led0 and led1 and led2 and led3
 end
 
@@ -111,10 +113,10 @@ function interface.set_option(name, value)
 	end
 end
 
-function getpiece()
+local function getpiece()
 	local piece = 0x00
 	for i=1,7 do
-		if (machine:outputs():get_value("s" .. (i+8) .. ".12") ~= 0) then
+		if (output:get_value("s" .. (i+8) .. ".12") ~= 0) then
 			piece = piece | (1 << (i-1))
 		end
 	end

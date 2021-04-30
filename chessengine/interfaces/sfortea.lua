@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "a1"
@@ -106,8 +108,8 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_value(tostring(8 - x) .. ".1") ~= 0
-	local yval = machine:outputs():get_value(tostring(y - 1) .. ".0") ~= 0
+	local xval = output:get_value(tostring(8 - x) .. ".1") ~= 0
+	local yval = output:get_value(tostring(y - 1) .. ".0") ~= 0
 	return xval and yval
 end
 

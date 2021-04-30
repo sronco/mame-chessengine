@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("chessmst")
 
 interface.level = 0
@@ -11,7 +13,7 @@ function interface.setlevel()
 	local lcd_num = { 0x00ff, 0x400c, 0x377, 0x023f, 0x38c, 0x03bb, 0x03fb, 0x020f, 0x3ff, 0x03bf }
 	send_input(":BUTTONS", 0x10, 0.5) -- Parameter / Information
 	send_input(":BUTTONS", 0x80, 0.5) -- Enter
-	while machine:outputs():get_value("digit0") ~= lcd_num[interface.level+1] do
+	while output:get_value("digit0") ~= lcd_num[interface.level+1] do
 		send_input(":BUTTONS", 0x01, 0.5) -- Move Fore
 	end
 	send_input(":EXTRA", 0x01, 0.5) -- Monitor
@@ -49,7 +51,7 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	local d0 = machine:outputs():get_value("digit0") & 0xffff
+	local d0 = output:get_value("digit0") & 0xffff
 	if     (d0 == 0xf730) then	return "q"
 	elseif (d0 == 0x93b4) then	return "r"
 	elseif (d0 == 0xd432) then	return "b"

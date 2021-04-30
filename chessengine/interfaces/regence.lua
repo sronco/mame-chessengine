@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 2
@@ -12,7 +14,7 @@ function interface.setlevel()
 		send_input(":IN.1", 0x02, 0.5) -- Level
 		local cur_level = 0
 		for y=0,7 do
-			if machine:outputs():get_indexed_value("0.", 7-y) ~= 0 then
+			if output:get_indexed_value("0.", 7-y) ~= 0 then
 				cur_level = cur_level + 1
 			end
 		end
@@ -35,7 +37,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_indexed_value(tostring(x - 1) .. ".", 8 - y) ~= 0
+	return output:get_indexed_value(tostring(x - 1) .. ".", 8 - y) ~= 0
 end
 
 function interface.select_piece(x, y, event)

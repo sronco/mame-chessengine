@@ -1,12 +1,17 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
-interface.level = "40/2:00 moves/hrs"
+interface.level = "010 sec/move"
 interface.cur_level = nil
-interface.levelnum = 2
+interface.levelnum = 1
+interface.style = "normal"
+interface.cur_style = nil
+interface.stylenum = 3
 
-function setdigits(n)
+local function setdigits(n)
 	local dram = machine.devices[':lcd:lcdc'].spaces['display']
-	send_input(":IN.3", 0x20, 0.2) -- Enter
+	send_input(":IN.3", 0x20, 0.25) -- Enter
 	for i=1,n do
 		if (n == 7 and (i == 3 or i == 5)) then
 			-- skip char
@@ -27,13 +32,13 @@ function setdigits(n)
 			end
 			for j=1,math.abs(k) do
 				if (k > 0) then
-					send_input(":IN.2", 0x40, 0.2) -- up
+					send_input(":IN.2", 0x40, 0.25) -- up
 				else
-					send_input(":IN.3", 0x40, 0.2) -- down
+					send_input(":IN.3", 0x40, 0.25) -- down
 				end
 			end
 			if (i < n) then
-				send_input(":IN.1", 0x40, 0.2) -- right
+				send_input(":IN.1", 0x40, 0.25) -- right
 			end
 		end
 	end
@@ -44,35 +49,60 @@ function interface.setlevel()
 		return
 	end
 	interface.cur_level = interface.level
-	send_input(":IN.2", 0x20, 0.2) -- Menu
-	send_input(":IN.1", 0x40, 0.2) -- right
-	send_input(":IN.3", 0x40, 0.2) -- down
-	send_input(":IN.1", 0x40, 0.2) -- right
+	send_input(":IN.2", 0x20, 0.25) -- Menu
+	send_input(":IN.1", 0x40, 0.25) -- right
+	send_input(":IN.3", 0x40, 0.25) -- down
+	send_input(":IN.1", 0x40, 0.25) -- right
 	if (interface.levelnum == 1) then
-		send_input(":IN.2", 0x40, 0.2) -- up
+		send_input(":IN.2", 0x40, 0.25) -- up
 		setdigits(3)
 	elseif (interface.levelnum == 2) then
 		setdigits(7)
 	elseif (interface.levelnum == 3) then
-		send_input(":IN.3", 0x40, 0.2) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
 		setdigits(2)
 	elseif (interface.levelnum == 4) then
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
 		setdigits(2)
 	elseif (interface.levelnum == 5) then
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
 		setdigits(2)
 	elseif (interface.levelnum == 6) then
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
-		send_input(":IN.3", 0x40, 0.2) -- down
+		send_input(":IN.2", 0x40, 0.25) -- up
+		send_input(":IN.2", 0x40, 0.25) -- up
 	end
-	send_input(":IN.3", 0x20, 0.2) -- Enter
-	send_input(":IN.2", 0x20, 0.2) -- Menu
+	send_input(":IN.3", 0x20, 0.25) -- Enter
+	send_input(":IN.2", 0x20, 0.25) -- Menu
+end
+
+function interface.setstyle()
+	if (interface.cur_style == nil or interface.cur_style == interface.style or interface.stylenum == 0) then
+		return
+	end
+	interface.cur_style = interface.style
+	send_input(":IN.2", 0x20, 0.25) -- Menu
+	send_input(":IN.3", 0x40, 0.25) -- down
+	send_input(":IN.3", 0x40, 0.25) -- down
+	send_input(":IN.1", 0x40, 0.25) -- right
+	send_input(":IN.2", 0x40, 0.25) -- up
+	send_input(":IN.1", 0x40, 0.25) -- right
+	if (interface.stylenum == 1) then
+		send_input(":IN.2", 0x40, 0.25) -- up
+	elseif (interface.stylenum == 2) then
+	elseif (interface.stylenum == 3) then
+		send_input(":IN.3", 0x40, 0.25) -- down
+	elseif (interface.stylenum == 4) then
+		send_input(":IN.3", 0x40, 0.25) -- down
+		send_input(":IN.3", 0x40, 0.25) -- down
+	elseif (interface.stylenum == 5) then
+		send_input(":IN.2", 0x40, 0.25) -- up
+		send_input(":IN.2", 0x40, 0.25) -- up
+	end
+	send_input(":IN.3", 0x20, 0.25) -- Enter
+	send_input(":IN.2", 0x20, 0.25) -- Menu
 end
 
 function interface.setup_machine()
@@ -81,6 +111,8 @@ function interface.setup_machine()
 
 	interface.cur_level = ""
 	interface.setlevel()
+	interface.cur_style = ""
+	interface.setstyle()
 end
 
 function interface.start_play(init)
@@ -88,11 +120,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local led0 = machine:outputs():get_value("led_" .. tostring(8 - y) .. tostring(8 - x)) == 1
-	local led1 = machine:outputs():get_value("led_" .. tostring(8 - y) .. tostring(9 - x)) == 1
-	local led2 = machine:outputs():get_value("led_" .. tostring(9 - y) .. tostring(8 - x)) == 1
-	local led3 = machine:outputs():get_value("led_" .. tostring(9 - y) .. tostring(9 - x)) == 1
-	return led0 and led1 and led2 and led3
+	return output:get_value("sb30_led_" .. tostring(8 - y) .. "." .. tostring(8 - x)) == 1
 end
 
 function interface.select_piece(x, y, event)
@@ -100,7 +128,7 @@ function interface.select_piece(x, y, event)
 end
 
 function interface.get_options()
-	return { { "string", "Level", "40/2:00 moves/hrs"}, }
+	return { { "string", "Level", "10 sec/move"}, { "combo", "Style", "normal", "defensive\tsolid\tnormal\tactive\toffensive"}, }
 end
 
 function interface.set_option(name, value)
@@ -137,6 +165,24 @@ function interface.set_option(name, value)
 		if (interface.levelnum ~= 0) then
 			interface.level = value
 			interface.setlevel()
+		end
+	elseif (name == "style" and value ~= "") then
+		local temp = string.upper(value)
+		interface.stylenum = 0
+		if (temp == "DEFENSIVE") then
+			interface.stylenum = 1
+		elseif (temp == "SOLID") then
+			interface.stylenum = 2
+		elseif (temp == "NORMAL") then
+			interface.stylenum = 3
+		elseif (temp == "ACTIVE") then
+			interface.stylenum = 4
+		elseif (temp == "OFFENSIVE") then
+			interface.stylenum = 5
+		end
+		if (interface.stylenum ~= 0) then
+			interface.style = value
+			interface.setstyle()
 		end
 	end
 end

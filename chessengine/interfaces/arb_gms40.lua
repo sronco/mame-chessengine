@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -18,7 +17,7 @@ function interface.setlevel()
 	local dif_level
 	send_input(":IN.0", 0x40, 0.5) -- Change Level
 	for y=0,7 do
-		if machine:outputs():get_indexed_value("8.", 7-y) ~= 0 then
+		if output:get_indexed_value("8.", 7-y) ~= 0 then
 			cur_leds = cur_leds + (1 << y)
 		end
 	end
@@ -58,10 +57,10 @@ end
 
 function interface.clear_announcements()
 	-- machine turns on all LEDs on the first line for mate/draw announcements
-	if (machine:outputs():get_value("0.0") ~= 0 and machine:outputs():get_value("1.1") ~= 0 and machine:outputs():get_value("2.2") ~= 0 and machine:outputs():get_value("3.3") ~= 0 and
-	    machine:outputs():get_value("4.4") ~= 0 and machine:outputs():get_value("5.5") ~= 0 and machine:outputs():get_value("6.6") ~= 0 and machine:outputs():get_value("7.7") ~= 0 and
-	    machine:outputs():get_value("0.7") ~= 0 and machine:outputs():get_value("1.6") ~= 0 and machine:outputs():get_value("2.5") ~= 0 and machine:outputs():get_value("3.4") ~= 0 and
-	    machine:outputs():get_value("4.3") ~= 0 and machine:outputs():get_value("5.2") ~= 0 and machine:outputs():get_value("6.1") ~= 0 and machine:outputs():get_value("7.0") ~= 0) then
+	if (output:get_value("0.0") ~= 0 and output:get_value("1.1") ~= 0 and output:get_value("2.2") ~= 0 and output:get_value("3.3") ~= 0 and
+	    output:get_value("4.4") ~= 0 and output:get_value("5.5") ~= 0 and output:get_value("6.6") ~= 0 and output:get_value("7.7") ~= 0 and
+	    output:get_value("0.7") ~= 0 and output:get_value("1.6") ~= 0 and output:get_value("2.5") ~= 0 and output:get_value("3.4") ~= 0 and
+	    output:get_value("4.3") ~= 0 and output:get_value("5.2") ~= 0 and output:get_value("6.1") ~= 0 and output:get_value("7.0") ~= 0) then
 		send_input(":IN.0", 0x02, 0.5) -- Clear
 	end
 end
@@ -72,7 +71,7 @@ function interface.is_selected(x, y)
 		emu.wait(0.5)
 	end
 
-	return machine:outputs():get_value((x - 1) .. "." .. (y-1)) ~= 0
+	return output:get_value((x - 1) .. "." .. (y-1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

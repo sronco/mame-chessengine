@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -10,7 +12,7 @@ function interface.setdigit(n,d)
 	if (led == 1) then
 		led = 0
 	end
-	while (machine:outputs():get_value("digit" .. led) ~= lcd_num[d+1]) do
+	while (output:get_value("digit" .. led) ~= lcd_num[d+1]) do
 		send_input(":IN.0", 0x20 >> n, 0.25)  -- ST / TB / LV
 	end
 end
@@ -57,9 +59,9 @@ end
 
 function interface.setup_machine()
 	sb_reset_board(":board")
-	emu.wait(3.0)
+	emu.wait(2)
 	send_input(":IN.1", 0x04, 1) -- New Game
-	emu.wait(1.0)
+	emu.wait(2)
 
 	interface.cur_level = "a1"
 	interface.setlevel()
@@ -71,8 +73,8 @@ end
 
 function interface.clear_announcements()
 	-- machine turns on all LEDs on the first line for mate/draw announcements
-	if (machine:outputs():get_value("0.8") ~= 0 and machine:outputs():get_value("0.9") ~= 0 and machine:outputs():get_value("0.10") ~= 0 and machine:outputs():get_value("0.11") ~= 0 and
-	    machine:outputs():get_value("0.12") ~= 0 and machine:outputs():get_value("0.13") ~= 0 and machine:outputs():get_value("0.14") ~= 0 and machine:outputs():get_value("0.15") ~= 0) then
+	if (output:get_value("0.8") ~= 0 and output:get_value("0.9") ~= 0 and output:get_value("0.10") ~= 0 and output:get_value("0.11") ~= 0 and
+	    output:get_value("0.12") ~= 0 and output:get_value("0.13") ~= 0 and output:get_value("0.14") ~= 0 and output:get_value("0.15") ~= 0) then
 		send_input(":IN.1", 0x01, 1) -- CL
 	end
 end
@@ -82,7 +84,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return machine:outputs():get_value((y - 1) .. "." .. (7 + x)) ~= 0
+	return output:get_value((y - 1) .. "." .. (7 + x)) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -110,10 +112,10 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion_led()
-	if     (machine:outputs():get_value("8.12") ~= 0) then	return 'q'
-	elseif (machine:outputs():get_value("8.11") ~= 0) then	return 'r'
-	elseif (machine:outputs():get_value("8.10") ~= 0) then	return 'b'
-	elseif (machine:outputs():get_value("8.9") ~= 0) then	return 'n'
+	if     (output:get_value("8.12") ~= 0) then	return 'q'
+	elseif (output:get_value("8.11") ~= 0) then	return 'r'
+	elseif (output:get_value("8.10") ~= 0) then	return 'b'
+	elseif (output:get_value("8.9") ~= 0) then	return 'n'
 	end
 	return nil
 end

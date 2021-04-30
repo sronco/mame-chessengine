@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.invert = false
@@ -58,7 +60,7 @@ end
 function interface.setup_machine()
 	sb_reset_board(":board")
 	interface.invert = false
-	emu.wait(4)
+	emu.wait(3)
 	send_input(":IN.1", 0x04, 1)	-- New Game
 	emu.wait(1)
 
@@ -79,10 +81,10 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	local xval0 = machine:outputs():get_indexed_value("4.", x - 1) ~= 0
-	local xval1 = machine:outputs():get_indexed_value("5.", x - 1) ~= 0
-	local yval0 = machine:outputs():get_indexed_value("2.", y - 1) ~= 0
-	local yval1 = machine:outputs():get_indexed_value("3.", y - 1) ~= 0
+	local xval0 = output:get_indexed_value("4.", x - 1) ~= 0
+	local xval1 = output:get_indexed_value("5.", x - 1) ~= 0
+	local yval0 = output:get_indexed_value("2.", y - 1) ~= 0
+	local yval1 = output:get_indexed_value("3.", y - 1) ~= 0
 	return (xval0 or xval1) and (yval0 or yval1)
 end
 
@@ -106,19 +108,19 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	if     (machine:outputs():get_value("0.6") ~= 0 or machine:outputs():get_value("1.6") ~= 0) then	return 'q'
-	elseif (machine:outputs():get_value("0.5") ~= 0 or machine:outputs():get_value("1.5") ~= 0) then	return 'r'
-	elseif (machine:outputs():get_value("0.4") ~= 0 or machine:outputs():get_value("1.4") ~= 0) then	return 'b'
-	elseif (machine:outputs():get_value("0.3") ~= 0 or machine:outputs():get_value("1.3") ~= 0) then	return 'n'
+	if     (output:get_value("0.6") ~= 0 or output:get_value("1.6") ~= 0) then	return 'q'
+	elseif (output:get_value("0.5") ~= 0 or output:get_value("1.5") ~= 0) then	return 'r'
+	elseif (output:get_value("0.4") ~= 0 or output:get_value("1.4") ~= 0) then	return 'b'
+	elseif (output:get_value("0.3") ~= 0 or output:get_value("1.3") ~= 0) then	return 'n'
 	end
 	return nil
 end
 
 function interface.promote_special(piece)
-	if     (piece=="q") then send_input(":IN.3", 0x01, 1) 
-	elseif (piece=="r") then send_input(":IN.2", 0x01, 1) 
-	elseif (piece=="b") then send_input(":IN.2", 0x04, 1) 
-	elseif (piece=="n") then send_input(":IN.3", 0x02, 1) 
+	if     (piece=="q") then send_input(":IN.3", 0x01, 1)
+	elseif (piece=="r") then send_input(":IN.2", 0x01, 1)
+	elseif (piece=="b") then send_input(":IN.2", 0x04, 1)
+	elseif (piece=="n") then send_input(":IN.3", 0x02, 1)
 	end
 end
 

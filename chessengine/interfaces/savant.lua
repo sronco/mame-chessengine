@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -22,9 +21,9 @@ function interface.setlevel()
 		send_input(":IN.2", 0x04, 1) -- Set Level
 
 		for x=0,7 do
-			if (machine:outputs():get_value(tostring(x) .. "." .. tostring(50 - (8 - 1) * 3)) == 1) then	levid = levid | (1 << x)	end
-			if (machine:outputs():get_value(tostring(x) .. "." .. tostring(50 - (5 - 1) * 3)) == 1) then	levid = levid | (1 << (8 + x))	end
-			if (machine:outputs():get_value(tostring(x) .. "." .. tostring(50 - (2 - 1) * 3)) == 1) then	levid = levid | (1 << (16 + x))	end
+			if (output:get_value(tostring(x) .. "." .. tostring(50 - (8 - 1) * 3)) == 1) then	levid = levid | (1 << x)	end
+			if (output:get_value(tostring(x) .. "." .. tostring(50 - (5 - 1) * 3)) == 1) then	levid = levid | (1 << (8 + x))	end
+			if (output:get_value(tostring(x) .. "." .. tostring(50 - (2 - 1) * 3)) == 1) then	levid = levid | (1 << (16 + x))	end
 		end
 	until level_id[interface.level + 1] == levid
 
@@ -93,11 +92,11 @@ function interface.is_pos_selected(x, y, piece)
 end
 
 function interface.is_selected_int(x, y)
-	local piece0 = machine:outputs():get_value(tostring(x-1) .. "." .. tostring(50 - (y - 1) * 3))
-	local piece1 = machine:outputs():get_value(tostring(x-1) .. "." .. tostring(23 - (y - 1) * 3))
+	local piece0 = output:get_value(tostring(x-1) .. "." .. tostring(50 - (y - 1) * 3))
+	local piece1 = output:get_value(tostring(x-1) .. "." .. tostring(23 - (y - 1) * 3))
 	if (interface.invert) then
-		piece0 = machine:outputs():get_value(tostring(8 -x) .. "." .. tostring(50 - (8 - y) * 3))
-		piece1 = machine:outputs():get_value(tostring(8 -x) .. "." .. tostring(23 - (8 - y) * 3))
+		piece0 = output:get_value(tostring(8 -x) .. "." .. tostring(50 - (8 - y) * 3))
+		piece1 = output:get_value(tostring(8 -x) .. "." .. tostring(23 - (8 - y) * 3))
 	end
 
 	local piece = 0

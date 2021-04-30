@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -10,7 +12,7 @@ function interface.setlevel()
 	interface.cur_level = interface.level
 	repeat
 		send_input(":IN.0", 0x40, 0.6) -- CL
-	until machine:outputs():get_value("7." .. interface.level-1) ~= 0
+	until output:get_value("7." .. interface.level-1) ~= 0
 end
 
 function interface.setup_machine()
@@ -29,13 +31,13 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	if (machine:outputs():get_value("0.0") ~= 0 and machine:outputs():get_value("1.0") ~= 0 and machine:outputs():get_value("2.0") ~= 0 and machine:outputs():get_value("3.0") ~= 0 or
-	    machine:outputs():get_value("4.0") ~= 0 and machine:outputs():get_value("5.0") ~= 0 and machine:outputs():get_value("6.0") ~= 0 and machine:outputs():get_value("7.0") ~= 0) then
+	if (output:get_value("0.0") ~= 0 and output:get_value("1.0") ~= 0 and output:get_value("2.0") ~= 0 and output:get_value("3.0") ~= 0 or
+	    output:get_value("4.0") ~= 0 and output:get_value("5.0") ~= 0 and output:get_value("6.0") ~= 0 and output:get_value("7.0") ~= 0) then
 		-- TODO: machine turns on all LEDs for mate announcement
 		return false
 	end
 
-	return machine:outputs():get_value(tostring(x - 1) .. "." .. tostring(y - 1)) ~= 0
+	return output:get_value(tostring(x - 1) .. "." .. tostring(y - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

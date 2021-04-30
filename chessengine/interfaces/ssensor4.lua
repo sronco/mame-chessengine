@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -12,7 +14,7 @@ function interface.setlevel()
 		send_input(":IN.6", 0x02, 0.5) -- Set Level
 		local cur_level = 0
 		for y=0,7 do
-			if machine:outputs():get_indexed_value("1.", y) ~= 0 then
+			if output:get_indexed_value("1.", y) ~= 0 then
 				cur_level = cur_level + 1
 			end
 		end
@@ -22,7 +24,7 @@ function interface.setlevel()
 	if (interface.level < 0 ) then
 		tc = 0x08
 	end
-	if (emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read(0x58) & 0x08 ~= tc) then
+	if (machine.devices[':maincpu'].spaces['program']:read_u8(0x58) & 0x08 ~= tc) then
 		send_input(":IN.1", 0x02, 1) -- Time Control
 	end
 end
@@ -41,7 +43,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return (machine:outputs():get_indexed_value("1.", (8 - y)) ~= 0) and (machine:outputs():get_indexed_value("2.", (x - 1)) ~= 0)
+	return (output:get_indexed_value("1.", (8 - y)) ~= 0) and (output:get_indexed_value("2.", (x - 1)) ~= 0)
 end
 
 function interface.select_piece(x, y, event)

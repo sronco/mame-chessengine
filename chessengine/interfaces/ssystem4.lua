@@ -1,8 +1,10 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("ssystem3")
 
 local d0,d1,d2,d3 = 0
 
-function getdigit(n)
+local function getdigit(n)
 	local map
 	if     (n == 0) then map = {"1.2","1.1","3.0","3.2","3.3","1.3","1.4"}
 	elseif (n == 1) then map = {"0.6","0.5","0.4","2.6","2.7","0.7","1.0"}
@@ -11,7 +13,7 @@ function getdigit(n)
 	end
 	local dig = 0x00
 	for i=1,7 do
-		if (machine:outputs():get_value(map[i]) ~= 0) then
+		if (output:get_value(map[i]) ~= 0) then
 			dig = dig | (1 << (i-1))
 		end
 	end
@@ -19,8 +21,8 @@ function getdigit(n)
 end
 
 function interface.is_selected(x, y)
-	if (machine:outputs():get_value("3.1") ~= 0) then -- COMPUTING?
-		d0,d1,d2,d3 = 0
+	if (output:get_value("3.1") ~= 0) then -- COMPUTING?
+		d0,d1,d2,d3 = 0,0,0,0
 		return false
 	end
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 }

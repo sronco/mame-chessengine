@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -16,7 +15,7 @@ function interface.setlevel()
 	repeat
 		send_input(":IN.0", 0x0010, 0.5) -- LEVEL
 		emu.wait(0.5)
-	until machine:outputs():get_value("digit3") == lcd_num[interface.level]
+	until output:get_value("digit3") == lcd_num[interface.level]
 	send_input(":IN.1", 0x08, 0.5) -- ERASE
 	emu.wait(0.5)
 end
@@ -39,10 +38,10 @@ end
 function interface.is_selected(x, y)
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 }
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
-	local d0 = machine:outputs():get_value("digit0")
-	local d1 = machine:outputs():get_value("digit1")
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit0")
+	local d1 = output:get_value("digit1")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
 	return (xval[x] == d0 and yval[y] == d1) or (xval[x] == d2 and yval[y] == d3)
 end
 

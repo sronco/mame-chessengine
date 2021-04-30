@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -9,7 +11,7 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	local level = interface.level
-	while machine:outputs():get_value(tostring(level-1) .. ".1") == 0 do
+	while output:get_value(tostring(level-1) .. ".1") == 0 do
 		send_input(":IN.1", 0x80, 0.6) -- Change Level
 	end
 end
@@ -28,8 +30,8 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_value(tostring(x - 1) .. ".0") ~= 0
-	local yval = machine:outputs():get_value(tostring(y - 1) .. ".1") ~= 0
+	local xval = output:get_value(tostring(x - 1) .. ".0") ~= 0
+	local yval = output:get_value(tostring(y - 1) .. ".1") ~= 0
 	return xval and yval
 end
 
@@ -57,10 +59,10 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	if     (machine:outputs():get_value("1.2") ~= 0) then return 'q'
-	elseif (machine:outputs():get_value("3.2") ~= 0) then return 'r'
-	elseif (machine:outputs():get_value("5.2") ~= 0) then return 'b'
-	elseif (machine:outputs():get_value("7.2") ~= 0) then return 'n'
+	if     (output:get_value("1.2") ~= 0) then return 'q'
+	elseif (output:get_value("3.2") ~= 0) then return 'r'
+	elseif (output:get_value("5.2") ~= 0) then return 'b'
+	elseif (output:get_value("7.2") ~= 0) then return 'n'
 	end
 end
 

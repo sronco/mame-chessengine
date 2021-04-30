@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -10,7 +12,7 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	local level = interface.level
-	while machine:outputs():get_indexed_value("7.", level - 1) == 0 do
+	while output:get_indexed_value("7.", level - 1) == 0 do
 		send_input(":IN.0", 0x80, 1.0) -- Level
 	end
 end
@@ -33,7 +35,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value((x - 1) .. "." .. (y - 1)) ~= 0
+	return output:get_value((x - 1) .. "." .. (y - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -58,10 +60,10 @@ end
 function interface.get_promotion(x, y)
 	interface.get_prom = true
 	local new_type = nil
-	if     (machine:outputs():get_value("8.6") ~= 0) then new_type = 'q'
-	elseif (machine:outputs():get_value("8.2") ~= 0) then new_type = 'r'
-	elseif (machine:outputs():get_value("8.4") ~= 0) then new_type = 'b'
-	elseif (machine:outputs():get_value("8.3") ~= 0) then new_type = 'n'
+	if     (output:get_value("8.6") ~= 0) then new_type = 'q'
+	elseif (output:get_value("8.2") ~= 0) then new_type = 'r'
+	elseif (output:get_value("8.4") ~= 0) then new_type = 'b'
+	elseif (output:get_value("8.3") ~= 0) then new_type = 'n'
 	end
 	return new_type
 end

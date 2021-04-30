@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = load_interface("chesster")
 

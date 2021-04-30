@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("sstar28k")
 
 function interface.setlevel()
@@ -23,7 +25,7 @@ function interface.setup_machine()
 	interface.invert = false
 	emu.wait(13)
 	send_input(":IN.0", 0x20, 1)	-- NEW GAME
-	emu.wait(0.5)
+	emu.wait(1)
 
 	interface.cur_level = "a1"
 	interface.setlevel()
@@ -38,7 +40,7 @@ function interface.set_option(name, value)
 				return
 			else
 				tmp = tmp:sub(4)
-		
+
 			end
 		end
 		interface.level = level

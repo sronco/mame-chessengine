@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -18,7 +17,7 @@ function interface.setlevel()
 	local dif_level
 	send_input(":IN.0", 0x08, 1) -- LV
 	for y=0,7 do
-		if machine:outputs():get_indexed_value("7.", y) ~= 0 then
+		if output:get_indexed_value("7.", y) ~= 0 then
 			cur_leds = cur_leds + (1 << y)
 		end
 	end
@@ -53,8 +52,8 @@ end
 
 function interface.clear_announcements()
 	-- machine turns on all leds on the first line for mate/draw announcements
-	if (machine:outputs():get_value("0.0") ~= 0 and machine:outputs():get_value("1.0") ~= 0 and machine:outputs():get_value("2.0") ~= 0 and machine:outputs():get_value("3.0") ~= 0 and
-	    machine:outputs():get_value("4.0") ~= 0 and machine:outputs():get_value("5.0") ~= 0 and machine:outputs():get_value("6.0") ~= 0 and machine:outputs():get_value("7.0") ~= 0) then
+	if (output:get_value("0.0") ~= 0 and output:get_value("1.0") ~= 0 and output:get_value("2.0") ~= 0 and output:get_value("3.0") ~= 0 and
+	    output:get_value("4.0") ~= 0 and output:get_value("5.0") ~= 0 and output:get_value("6.0") ~= 0 and output:get_value("7.0") ~= 0) then
 		send_input(":IN.0", 0x40, 1)
 	end
 end
@@ -64,7 +63,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return machine:outputs():get_indexed_value(tostring(x - 1) .. ".", y - 1) ~= 0
+	return output:get_indexed_value(tostring(x - 1) .. ".", y - 1) ~= 0
 end
 
 function interface.select_piece(x, y, event)

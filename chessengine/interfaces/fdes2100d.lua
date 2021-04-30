@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -32,10 +34,10 @@ function interface.start_play(init)
 end
 
 function interface.clear_announcements()
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
-	local d4 = machine:outputs():get_value("digit4")
-	local d5 = machine:outputs():get_value("digit5")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
+	local d4 = output:get_value("digit4")
+	local d5 = output:get_value("digit5")
 
 	-- clear announcements to continue the game
 	if (((d3 == 0x54 or d3 == 0x37) and d4 == 0x00) or			-- 'M ' forced checkmate found in X moves
@@ -50,7 +52,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return (machine:outputs():get_indexed_value("0.", (y - 1)) ~= 0) and (machine:outputs():get_indexed_value("1.", (x - 1)) ~= 0)
+	return (output:get_indexed_value("0.", (y - 1)) ~= 0) and (output:get_indexed_value("1.", (x - 1)) ~= 0)
 end
 
 function interface.select_piece(x, y, event)

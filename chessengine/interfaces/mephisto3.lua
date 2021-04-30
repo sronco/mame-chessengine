@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -41,7 +40,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value((y + 3) .. "." .. (x - 1)) ~= 0
+	return output:get_value((y - 1) .. "." .. (x - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

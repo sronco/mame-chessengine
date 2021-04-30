@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("amsterd")
 
 interface.level = "02"
@@ -9,19 +11,19 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	local level = interface.level
-	send_input(":LINE1", 0x04, 0.25) -- LEV
+	send_input(":KEY.1", 0x04, 0.25) -- LEV
 	for i=1,level:len() do
 		local n = level:sub(i,i)
 		if (n == " " or n == ":" or n == "/") then
-			send_input(":LINE1", 0x20, 0.25) -- ENT
-			if (n == " " and (machine:outputs():get_value("digit3") & 0x7f) == 0x54) then
-				send_input(":LINE1", 0x20, 0.25) -- ENT
+			send_input(":KEY.1", 0x20, 0.25) -- ENT
+			if (n == " " and (output:get_value("digit3") & 0x7f) == 0x54) then
+				send_input(":KEY.1", 0x20, 0.25) -- ENT
 			end
 		else
 			interface.setdigit(tonumber(n))
 		end
 	end
-	send_input(":LINE1", 0x20, 0.25) -- ENT
+	send_input(":KEY.1", 0x20, 0.25) -- ENT
 end
 
 function interface.setup_machine()

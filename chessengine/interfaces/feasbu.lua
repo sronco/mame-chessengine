@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -10,7 +12,7 @@ function interface.setdigit(n,d)
 	if (led == 1) then
 		led = 0
 	end
-	while (machine:outputs():get_value("digit" .. led) ~= lcd_num[d+1]) do
+	while (output:get_value("digit" .. led) ~= lcd_num[d+1]) do
 		send_input(":IN.0", 0x10 << n, 0.25)  -- ST / TB / LV
 	end
 end
@@ -57,11 +59,11 @@ end
 
 function interface.setup_machine()
 	sb_reset_board(":board")
-	emu.wait(5)
+	emu.wait(1)
 	send_input(":IN.0", 0x01, 0.5)  -- Game Control
 	sb_press_square(":board", 1, 4, 8)  -- D8
 	send_input(":IN.1", 0x02, 0.5) -- CL
-	emu.wait(1)
+	emu.wait(3)
 
 	interface.cur_level = "a1"
 	interface.setlevel()
@@ -73,8 +75,8 @@ end
 
 function interface.clear_announcements()
 	-- machine turns on all LEDs on the first line for mate/draw announcements
-	if (machine:outputs():get_value("0.15") ~= 0 and machine:outputs():get_value("1.15") ~= 0 and machine:outputs():get_value("2.15") ~= 0 and machine:outputs():get_value("3.15") ~= 0 and
-	    machine:outputs():get_value("4.15") ~= 0 and machine:outputs():get_value("5.15") ~= 0 and machine:outputs():get_value("6.15") ~= 0 and machine:outputs():get_value("7.15") ~= 0) then
+	if (output:get_value("0.15") ~= 0 and output:get_value("1.15") ~= 0 and output:get_value("2.15") ~= 0 and output:get_value("3.15") ~= 0 and
+	    output:get_value("4.15") ~= 0 and output:get_value("5.15") ~= 0 and output:get_value("6.15") ~= 0 and output:get_value("7.15") ~= 0) then
 		send_input(":IN.1", 0x02, 1) -- CL
 	end
 end
@@ -84,7 +86,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return machine:outputs():get_indexed_value(tostring(x - 1) .. ".", 16 - y) ~= 0
+	return output:get_indexed_value(tostring(x - 1) .. ".", 16 - y) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -116,10 +118,10 @@ function interface.get_promotion(x, y)
 	interface.select_piece(x, y, "")
 
 	local new_type = nil
-	if     (machine:outputs():get_value("8.9")  ~= 0) then	new_type = 'q'
-	elseif (machine:outputs():get_value("8.10") ~= 0) then	new_type = 'r'
-	elseif (machine:outputs():get_value("8.11") ~= 0) then	new_type = 'b'
-	elseif (machine:outputs():get_value("8.12") ~= 0) then	new_type = 'n'
+	if     (output:get_value("8.9")  ~= 0) then	new_type = 'q'
+	elseif (output:get_value("8.10") ~= 0) then	new_type = 'r'
+	elseif (output:get_value("8.11") ~= 0) then	new_type = 'b'
+	elseif (output:get_value("8.12") ~= 0) then	new_type = 'n'
 	end
 
 	interface.select_piece(x, y, "")

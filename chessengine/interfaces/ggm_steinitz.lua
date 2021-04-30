@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -69,7 +71,7 @@ function interface.is_selected(x, y)
 	if (x == 1 and y == 1) then
 		computing = false
 		for i=1,4 do
-			if (machine:outputs():get_value("digit7") == 0) then
+			if (output:get_value("digit7") == 0) then
 				computing = true
 				return false
 			elseif (i<4) then
@@ -81,11 +83,11 @@ function interface.is_selected(x, y)
 	end
 	local xval = { 0x0f7, 0x3cf, 0x039, 0x30f, 0x0f9, 0x0f1, 0x0bd, 0x0f6 }
 	local yval = { 0x300, 0x0db, 0x0cf, 0x0e6, 0x0ed, 0x0fd, 0x007, 0x0ff }
-	local d0 = machine:outputs():get_value("digit7")
-	local d1 = machine:outputs():get_value("digit6")
-	local d2 = machine:outputs():get_value("digit5")
-	local d3 = machine:outputs():get_value("digit4")
-	local d4 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit7")
+	local d1 = output:get_value("digit6")
+	local d2 = output:get_value("digit5")
+	local d3 = output:get_value("digit4")
+	local d4 = output:get_value("digit3")
 	return ((xval[x] == d0 and yval[y] == d1) or (xval[x] == d3 and yval[y] == d4))
 end
 
@@ -124,7 +126,7 @@ end
 
 function interface.set_option(name, value)
 	if (name == "level") then
-		local level = value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ") -- trim 
+		local level = value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ") -- trim
 		if (level:sub(1,3) ~= "10 ") then
 			level = tonumber(level)
 			if (level == nil or level < 0 or level > 10) then

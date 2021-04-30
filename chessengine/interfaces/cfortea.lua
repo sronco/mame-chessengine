@@ -1,14 +1,16 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("supercon")
 
 interface.level = "a1"
 interface.cur_level = nil
 
 function interface.getdigit(n)
-	local ddram = emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff'])
-	local d = ddram:read(0xc20 + n) & 0x7f
+	local ddram = machine.devices[':maincpu'].spaces['program']
+	local d = ddram:read_u8(0xc20 + n) & 0x7f
 	while (d == 0x20) do
 		emu.wait(0.5)
-		d = ddram:read(0xc20 + n) & 0x7f
+		d = ddram:read_u8(0xc20 + n) & 0x7f
 	end
 	return d
 end
@@ -103,7 +105,7 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	local d8 = machine:outputs():get_value("digit8")
+	local d8 = output:get_value("digit8")
 
 	if     (d8 == 0x67) then	return "q"
 	elseif (d8 == 0x50) then	return "r"

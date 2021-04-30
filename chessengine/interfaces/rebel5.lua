@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("mm4")
 
 interface.level = 1
@@ -8,20 +10,20 @@ function interface.setlevel()
 		return
 	end
 	interface.cur_level = interface.level
-	send_input(":KEY1_4", 0x80, 1) -- LEV
+	send_input(":KEY.0", 0x10, 1) -- LEV
 	local n = tonumber(interface.level)
-	if     (n == 0) then send_input(":KEY1_6", 0x80, 1)
-	elseif (n == 1) then send_input(":KEY2_3", 0x80, 1)
-	elseif (n == 2) then send_input(":KEY2_5", 0x80, 1)
-	elseif (n == 3) then send_input(":KEY2_6", 0x80, 1)
-	elseif (n == 4) then send_input(":KEY2_7", 0x80, 1)
-	elseif (n == 5) then send_input(":KEY2_0", 0x80, 1)
-	elseif (n == 6) then send_input(":KEY2_1", 0x80, 1)
-	elseif (n == 7) then send_input(":KEY2_2", 0x80, 1)
-	elseif (n == 8) then send_input(":KEY2_4", 0x80, 1)
-	elseif (n == 9) then send_input(":KEY1_7", 0x80, 1)
+	if     (n == 0) then send_input(":KEY.0", 0x40, 1)
+	elseif (n == 1) then send_input(":KEY.1", 0x08, 1)
+	elseif (n == 2) then send_input(":KEY.1", 0x20, 1)
+	elseif (n == 3) then send_input(":KEY.1", 0x40, 1)
+	elseif (n == 4) then send_input(":KEY.1", 0x80, 1)
+	elseif (n == 5) then send_input(":KEY.1", 0x01, 1)
+	elseif (n == 6) then send_input(":KEY.1", 0x02, 1)
+	elseif (n == 7) then send_input(":KEY.1", 0x04, 1)
+	elseif (n == 8) then send_input(":KEY.1", 0x10, 1)
+	elseif (n == 9) then send_input(":KEY.0", 0x80, 1)
 	end
-	send_input(":KEY1_5", 0x80, 1) -- ENT
+	send_input(":KEY.0", 0x20, 1) -- ENT
 end
 
 function interface.get_options()

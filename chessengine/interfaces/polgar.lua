@@ -1,10 +1,12 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "NORMAL 0:10"
 interface.cur_level = nil
 interface.levelnum = 1
 
-function setdigits(n,r,s)
+local function setdigits(n,r,s)
 	local ddram = emu.item(machine.devices[':display:hd44780'].items['0/m_ddram'])
 	send_input(":KEY", 0x40, 0.25) -- ENT
 	for i=1,n do
@@ -94,7 +96,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_indexed_value("led", (y - 1) * 8 + (x - 1)) ~= 0
+	return output:get_indexed_value("led", (y - 1) * 8 + (x - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

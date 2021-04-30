@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("fex68k")
 
 interface.level = "a1"

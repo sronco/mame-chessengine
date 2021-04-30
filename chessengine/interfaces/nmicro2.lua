@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -9,13 +11,13 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	local hold = 0.5
-	if machine:outputs():get_value("fast") == 1 then
+	if output:get_value("fast") == 1 then
 		hold = 0.25
 	end
 	send_input(":IN.0", 0x10, hold) -- Set Level
 	emu.wait(0.75-hold)
 	local k = 8
-	while machine:outputs():get_indexed_value("0.", k - 1) == 0 do
+	while output:get_indexed_value("0.", k - 1) == 0 do
 		k = k - 1
 	end
 	k = (interface.level - k + 8) % 8
@@ -35,7 +37,7 @@ end
 
 function interface.start_play(init)
 	local hold = 0.5
-	if machine:outputs():get_value("fast") == 1 then
+	if output:get_value("fast") == 1 then
 		hold = 0.25
 	end
 	send_input(":IN.0", 0x80, hold) -- Go
@@ -45,8 +47,8 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("1.", (x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("0.", (y - 1)) ~= 0
+	local xval = output:get_indexed_value("1.", (x - 1)) ~= 0
+	local yval = output:get_indexed_value("0.", (y - 1)) ~= 0
 	return xval and yval
 end
 

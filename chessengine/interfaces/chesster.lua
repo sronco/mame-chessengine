@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -38,7 +40,7 @@ function interface.start_play(init)
 end
 
 function interface.clear_announcements()
-	if (machine:outputs():get_value("9.1") ~= 0) then
+	if (output:get_value("9.1") ~= 0) then
 		send_input(":IN.0", 0x01, 0.5) -- CLEAR
 	end
 end
@@ -48,7 +50,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return (machine:outputs():get_indexed_value("0.", (y - 1)) ~= 0) and (machine:outputs():get_indexed_value("1.", (x - 1)) ~= 0)
+	return (output:get_indexed_value("0.", (y - 1)) ~= 0) and (output:get_indexed_value("1.", (x - 1)) ~= 0)
 end
 
 function interface.select_piece(x, y, event)

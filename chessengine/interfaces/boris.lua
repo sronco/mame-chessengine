@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -64,11 +66,11 @@ end
 function interface.is_selected_int(x, y)
 	local xval = { 0x3cf, 0x0e3f, 0x00f3, 0x0c3f, 0x01f3, 0x01c3, 0x02fb, 0x03cc }
 	local yval = { 0xc31, 0x0377, 0x023f, 0x038c, 0x03bb, 0x03fb, 0x4803, 0x03ff }
-	local d0 = machine:outputs():get_value("digit7")
-	local d1 = machine:outputs():get_value("digit6")
-	local d2 = machine:outputs():get_value("digit5")
-	local d3 = machine:outputs():get_value("digit4")
-	local d4 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit7")
+	local d1 = output:get_value("digit6")
+	local d2 = output:get_value("digit5")
+	local d3 = output:get_value("digit4")
+	local d4 = output:get_value("digit3")
 	return (d2 == 0x0003 or interface.color == "W") and (d2 == 0x0030 or interface.color == "B") and ((xval[x] == d0 and yval[y] == d1) or (xval[x] == d3 and yval[y] == d4))
 end
 

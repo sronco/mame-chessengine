@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("scptchess")
 
 function interface.setlevel()
@@ -9,12 +11,12 @@ function interface.setlevel()
 		send_input(":IN.0", 0x80, 0.6) -- Level
 		local cur_level = 0
 		for y=0,7 do
-			if machine:outputs():get_indexed_value(y .. ".", 1) ~= 0 then
+			if output:get_indexed_value(y .. ".", 1) ~= 0 then
 				cur_level = cur_level + 1
 			end
 		end
 		for x=0,7 do
-			if machine:outputs():get_indexed_value(7 - x .. ".", 0) ~= 0 then
+			if output:get_indexed_value(7 - x .. ".", 0) ~= 0 then
 				cur_level = cur_level + 1
 			end
 		end

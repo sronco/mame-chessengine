@@ -1,9 +1,11 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "TURN 01"
 interface.cur_level = nil
 
-function proglevel(level)
+local function proglevel(level)
 	local n,z1,z2,h1,h2,dir,dif,mod,int = 0
 	local ddram = emu.item(machine.devices[':display:hd44780'].items['0/m_ddram'])
 	while (n<4 and level:match("%s%d%d/%d%d:%d%d") ~= nil) do
@@ -146,7 +148,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_indexed_value("led", (y - 1) * 8 + (x - 1)) ~= 0
+	return output:get_indexed_value("led", (y - 1) * 8 + (x - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

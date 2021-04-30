@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -10,8 +12,8 @@ function interface.setlevel()
 	interface.cur_level = interface.level
 	local level = math.abs(interface.level)
 	send_input(":IN.6", 0x02, 1) -- Set Level
-	local infinite = machine:outputs():get_value("0.6") == 0 and machine:outputs():get_value("0.5") ~= 0
-	local training = machine:outputs():get_value("8.1") ~= 0
+	local infinite = output:get_value("0.6") == 0 and output:get_value("0.5") ~= 0
+	local training = output:get_value("8.1") ~= 0
 	if (level == 0) then
 		if (not infinite) then
 			send_input(":IN.3", 0x02, 1) -- Infinite
@@ -21,7 +23,7 @@ function interface.setlevel()
 			sb_press_square(":board", 0.5, 1, level)
 		else
 			sb_press_square(":board", 0.5, 1, 8)
-			for i=1,level-8 do		
+			for i=1,level-8 do
 				send_input(":IN.6", 0x02, 0.5) -- Set Level
 			end
 		end
@@ -46,7 +48,7 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_indexed_value(tostring(x - 1) .. ".", 8 - y) ~= 0 
+	return output:get_indexed_value(tostring(x - 1) .. ".", 8 - y) ~= 0
 end
 
 function interface.select_piece(x, y, event)
@@ -73,7 +75,7 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
-	sb_promote(":board", x, y, piece)       -- TODO
+	sb_promote(":board", x, y, piece)	-- TODO
 --	emu.wait(1.0)
 	if     (piece == "q") then send_input(":IN.1", 0x02, 1)
 	elseif (piece == "r") then send_input(":IN.4", 0x02, 1)

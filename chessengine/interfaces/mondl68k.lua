@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 2
@@ -38,8 +40,8 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("0.", (x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("1.", (y - 1)) ~= 0
+	local xval = output:get_indexed_value("0.", (x - 1)) ~= 0
+	local yval = output:get_indexed_value("1.", (y - 1)) ~= 0
 	return xval and yval
 end
 
@@ -66,9 +68,9 @@ function interface.get_promotion(x, y)
 	send_input(":IN.2", 0x04, 0.5) -- INFO
 	send_input(":IN.0", 0x01, 0.5) -- 1
 	send_input(":IN.1", 0x04, 0.5) -- 0
-	local d0 = machine:outputs():get_value("digit0") & 0x7f
-	local d1 = machine:outputs():get_value("digit1") & 0x7f
-	local d3 = machine:outputs():get_value("digit3") & 0x7f
+	local d0 = output:get_value("digit0") & 0x7f
+	local d1 = output:get_value("digit1") & 0x7f
+	local d3 = output:get_value("digit3") & 0x7f
 
 	local piece = nil
 	if (d0 == 0x73 and d1 == 0x50) then	-- display shows 'Pr'

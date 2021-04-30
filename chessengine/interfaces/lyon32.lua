@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("alm32")
 
 interface.level = "NORML 01"

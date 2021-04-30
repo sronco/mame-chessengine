@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.invert = false
@@ -12,7 +14,7 @@ function interface.setlevel()
 	local level = interface.level
 	repeat
 		send_input(":IN.0", 0x08, 0.6) -- Level
-	until machine:outputs():get_indexed_value("0.", tostring(level-1)) ~= 0
+	until output:get_indexed_value("0.", tostring(level-1)) ~= 0
 	send_input(":IN.0", 0x40, 0.6) -- Clear
 end
 
@@ -45,8 +47,8 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	local xval = machine:outputs():get_indexed_value("1.", tostring(x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("0.", tostring(y - 1)) ~= 0
+	local xval = output:get_indexed_value("1.", tostring(x - 1)) ~= 0
+	local yval = output:get_indexed_value("0.", tostring(y - 1)) ~= 0
 	return xval and yval
 end
 

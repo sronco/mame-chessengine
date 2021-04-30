@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -27,6 +29,7 @@ function interface.setup_machine()
 	sb_reset_board(":board")
 	emu.wait(1)
 	send_input(":IN.0", 0x80, 0.5) -- New Game
+	emu.wait(0.5)
 
 --	interface.cur_level = 1
 	interface.setlevel()
@@ -38,11 +41,11 @@ end
 
 function interface.is_selected(x, y)
 	local xval,yval
-	if (x < 7) then xval = machine:outputs():get_indexed_value("0.", (x - 1)) ~= 0
-	else xval = machine:outputs():get_indexed_value("1.", (x - 3)) ~= 0
+	if (x < 7) then xval = output:get_indexed_value("0.", (x - 1)) ~= 0
+	else xval = output:get_indexed_value("1.", (x - 3)) ~= 0
 	end
-	if (y > 2) then yval = machine:outputs():get_indexed_value("2.", (8 - y)) ~= 0
-	else yval = machine:outputs():get_indexed_value("1.", (2 - y)) ~= 0
+	if (y > 2) then yval = output:get_indexed_value("2.", (8 - y)) ~= 0
+	else yval = output:get_indexed_value("1.", (2 - y)) ~= 0
 	end
 	return xval and yval
 end

@@ -1,4 +1,6 @@
-interface = load_interface("megaiv")
+-- license:BSD-3-Clause
+
+interface = load_interface("mega4")
 
 interface.level = "a2"
 interface.cur_level = nil
@@ -14,25 +16,25 @@ function interface.setlevel()
 		return
 	end
 	local y = interface.level:sub(2, 2)
-	send_input(":KEY.1", 0x08, 1)  -- LEV
+	send_input(":KEY.0", 0x08, 1)  -- LEV
 	emu.wait(0.5)
-	sb_press_square(":board:board", 1, x, y)
+	sb_press_square(":board", 1, x, y)
 	emu.wait(0.5)
-	send_input(":KEY.1", 0x80, 1) -- CL
+	send_input(":KEY.1", 0x08, 1) -- CL
 end
 
 function interface.get_promotion(x, y)
-	local d0 = machine:outputs():get_value("digit0") & 0x7f
-	local d1 = machine:outputs():get_value("digit1") & 0x7f
-	local d4 = machine:outputs():get_value("digit4") & 0x7f
-	local d5 = machine:outputs():get_value("digit5") & 0x7f
+	local d0 = output:get_value("digit0") & 0x7f
+	local d1 = output:get_value("digit1") & 0x7f
+	local d4 = output:get_value("digit4") & 0x7f
+	local d5 = output:get_value("digit5") & 0x7f
 	local d3 = nil
 
 	if (d0 == 0x73 and d1 == 0x50) then	-- UPper display shows 'Pr'
-		d3 = machine:outputs():get_value("digit3") & 0x7f
+		d3 = output:get_value("digit3") & 0x7f
 	end
 	if (d4 == 0x73 and d5 == 0x50) then	-- lower display shows 'Pr'
-		d3 = machine:outputs():get_value("digit7") & 0x7f
+		d3 = output:get_value("digit7") & 0x7f
 	end
 
 	if     (d3 == 0x5e) then	return "q"

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "a2"
@@ -26,11 +28,11 @@ function interface.setup_machine()
 
 	-- CL + ENT for start a new game
 	emu.wait(1)
-	machine:ioport().ports[":KEY"]:field(0x80):set_value(1)
-	machine:ioport().ports[":KEY"]:field(0x40):set_value(1)
+	ioport.ports[":KEY"]:field(0x80):set_value(1)
+	ioport.ports[":KEY"]:field(0x40):set_value(1)
 	emu.wait(0.5)
-	machine:ioport().ports[":KEY"]:field(0x40):set_value(0)
-	machine:ioport().ports[":KEY"]:field(0x80):set_value(0)
+	ioport.ports[":KEY"]:field(0x40):set_value(0)
+	ioport.ports[":KEY"]:field(0x80):set_value(0)
 	emu.wait(2)
 
 	interface.cur_level = "a2"
@@ -44,12 +46,12 @@ end
 function interface.is_selected(x, y)
 	local xvals = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 }
 	local yvals = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f }
-	local d0 = machine:outputs():get_value("digit3") & 0x7f
-	local d1 = machine:outputs():get_value("digit2") & 0x7f
-	local d2 = machine:outputs():get_value("digit1") & 0x7f
-	local d3 = machine:outputs():get_value("digit0") & 0x7f
-	local xval = machine:outputs():get_indexed_value("1.", x - 1) ~= 0
-	local yval = machine:outputs():get_indexed_value("2.", y - 1) ~= 0
+	local d0 = output:get_value("digit3") & 0x7f
+	local d1 = output:get_value("digit2") & 0x7f
+	local d2 = output:get_value("digit1") & 0x7f
+	local d3 = output:get_value("digit0") & 0x7f
+	local xval = output:get_indexed_value("1.", x - 1) ~= 0
+	local yval = output:get_indexed_value("2.", y - 1) ~= 0
 	return (xvals[x] == d0 and yvals[y] == d1) or (xvals[x] == d2 and yvals[y] == d3) or (xval and yval)
 end
 
@@ -69,9 +71,9 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	local d0 = machine:outputs():get_value("digit3") & 0x7f
-	local d1 = machine:outputs():get_value("digit2") & 0x7f
-	local d3 = machine:outputs():get_value("digit0") & 0x7f
+	local d0 = output:get_value("digit3") & 0x7f
+	local d1 = output:get_value("digit2") & 0x7f
+	local d3 = output:get_value("digit0") & 0x7f
 
 	if (d0 == 0x73 and d1 == 0x50) then	-- display shows 'Pr'
 		if     (d3 == 0x5e) then	return "q"

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "1"
@@ -14,7 +16,7 @@ function interface.setlevel()
 	lev = lev:find(level:sub(1,1))
 	repeat
 		send_input(":IN.1", 0x08, 0.75) -- LV
-	until machine:outputs():get_value("digit0") == lcd_lev[lev]
+	until output:get_value("digit0") == lcd_lev[lev]
 	send_input(":IN.1", 0x01, 0.5) -- TM
 end
 
@@ -43,7 +45,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value(tostring(x - 1) .. "." .. tostring(y - 1 + 8)) ~= 0
+	return output:get_value(tostring(x - 1) .. "." .. tostring(y - 1 + 8)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

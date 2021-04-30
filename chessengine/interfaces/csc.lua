@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "1"
@@ -16,11 +18,11 @@ function interface.setlevel()
 	if (lev < 9 or lev > 10) then
 		repeat
 			send_input(":IN.3", 0x100, 0.6) -- LV
-		until machine:outputs():get_value("digit0") == lcd_lev[lev]
+		until output:get_value("digit0") == lcd_lev[lev]
 	else
 		repeat
 			send_input(":IN.3", 0x100, 0.6) -- LV
-		until machine:outputs():get_value("digit0") == lcd_lev[lev-1]
+		until output:get_value("digit0") == lcd_lev[lev-1]
 		send_input(":IN.3", 0x100, 0.6) -- LV
 		level = level:sub(3)
 		local d1,d2,d3
@@ -30,12 +32,12 @@ function interface.setlevel()
 				if (level:sub(1,2) ~= "00") then
 					d1=lcd_num[tonumber(level:sub(1,1))+1]
 					d2=lcd_num[tonumber(level:sub(2,2))+1]
-					machine:ioport().ports[":IN.5"]:field(0x100):set_value(1) -- ST
+					ioport.ports[":IN.5"]:field(0x100):set_value(1) -- ST
 					repeat
 						emu.wait(0.05)
-					until (machine:outputs():get_value("digit1") == d1 and machine:outputs():get_value("digit0") == d2)
+					until (output:get_value("digit1") == d1 and output:get_value("digit0") == d2)
 				end
-				machine:ioport().ports[":IN.5"]:field(0x100):set_value(0) -- ST
+				ioport.ports[":IN.5"]:field(0x100):set_value(0) -- ST
 				emu.wait(0.5)
 				level = level:sub(4)
 			end
@@ -44,12 +46,12 @@ function interface.setlevel()
 				d1=lcd_num[tonumber(level:sub(1,1))+1]
 				d2=lcd_num[tonumber(level:sub(3,3))+1]
 				d3=lcd_num[tonumber(level:sub(4,4))+1]
-				machine:ioport().ports[":IN.5"]:field(0x100):set_value(1) -- ST
+				ioport.ports[":IN.5"]:field(0x100):set_value(1) -- ST
 				repeat
 					emu.wait(0.05)
-				until (machine:outputs():get_value("digit2") == d1 and machine:outputs():get_value("digit1") == d2 and machine:outputs():get_value("digit0") == d3)
+				until (output:get_value("digit2") == d1 and output:get_value("digit1") == d2 and output:get_value("digit0") == d3)
 			end
-			machine:ioport().ports[":IN.5"]:field(0x100):set_value(0) -- ST
+			ioport.ports[":IN.5"]:field(0x100):set_value(0) -- ST
 			emu.wait(0.5)
 			level = level:sub(6)
 		end
@@ -79,7 +81,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value(tostring(x - 1) .. "." .. tostring(y - 1 + 8)) ~= 0
+	return output:get_value(tostring(x - 1) .. "." .. tostring(y - 1 + 8)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

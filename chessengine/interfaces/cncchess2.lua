@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -36,11 +38,11 @@ function interface.setup_machine()
 	sb_reset_board(":board")
 	emu.wait(8)
 	local switch = false
-	if (emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read(0x13) == 0x04) then
+	if (machine.devices[':maincpu'].spaces['program']:read_u8(0x13) == 0x04) then
 		send_input(":IN.0", 0x08, 1)  -- Play
 		switch = true
 	end
-	if (emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read(0x07) == 0x01) then
+	if (machine.devices[':maincpu'].spaces['program']:read_u8(0x07) == 0x01) then
 		send_input(":IN.1", 0x02, 1)  -- White
 		switch = true
 	end
@@ -86,14 +88,14 @@ function interface.is_selected(x, y)
 	end
 	-- castling moves
 	if (y == 8 or y == 1) then
-		local d1=(machine:outputs():get_value((y - 1) .. "." .. 0) ~= 0)
-		local d2=(machine:outputs():get_value((y - 1) .. "." .. 1) ~= 0)
-		local d3=(machine:outputs():get_value((y - 1) .. "." .. 2) ~= 0)
-		local d4=(machine:outputs():get_value((y - 1) .. "." .. 3) ~= 0)
-		local d5=(machine:outputs():get_value((y - 1) .. "." .. 4) ~= 0)
-		local d6=(machine:outputs():get_value((y - 1) .. "." .. 5) ~= 0)
-		local d7=(machine:outputs():get_value((y - 1) .. "." .. 6) ~= 0)
-		local d8=(machine:outputs():get_value((y - 1) .. "." .. 7) ~= 0)
+		local d1=(output:get_value((y - 1) .. "." .. 0) ~= 0)
+		local d2=(output:get_value((y - 1) .. "." .. 1) ~= 0)
+		local d3=(output:get_value((y - 1) .. "." .. 2) ~= 0)
+		local d4=(output:get_value((y - 1) .. "." .. 3) ~= 0)
+		local d5=(output:get_value((y - 1) .. "." .. 4) ~= 0)
+		local d6=(output:get_value((y - 1) .. "." .. 5) ~= 0)
+		local d7=(output:get_value((y - 1) .. "." .. 6) ~= 0)
+		local d8=(output:get_value((y - 1) .. "." .. 7) ~= 0)
 		if (not interface.invert) then
 			if (d1 and d3 and d4 and d5) then
 				if (x == 5 or x == 3) then
@@ -129,26 +131,26 @@ function interface.is_selected(x, y)
 	-- enpassant moves
 	if (not interface.invert) then
 		if (y == 4) then
-			local d1=(machine:outputs():get_value(3 .. "." .. (x-2)) ~= 0)
-			local d2=(machine:outputs():get_value(3 .. "." .. (x-1)) ~= 0)
-			local d3=(machine:outputs():get_value(3 .. "." .. (x-0)) ~= 0)
-			local d4=(machine:outputs():get_value(2 .. "." .. (x-1)) ~= 0)
+			local d1=(output:get_value(3 .. "." .. (x-2)) ~= 0)
+			local d2=(output:get_value(3 .. "." .. (x-1)) ~= 0)
+			local d3=(output:get_value(3 .. "." .. (x-0)) ~= 0)
+			local d4=(output:get_value(2 .. "." .. (x-1)) ~= 0)
 			if (d2 and d4 and (d1 or d3)) then
 				return false
 			end
 		end
 	else
 		if (y == 5) then
-			local d1=(machine:outputs():get_value(4 .. "." .. (x-2)) ~= 0)
-			local d2=(machine:outputs():get_value(4 .. "." .. (x-1)) ~= 0)
-			local d3=(machine:outputs():get_value(4 .. "." .. (x-0)) ~= 0)
-			local d4=(machine:outputs():get_value(5 .. "." .. (x-1)) ~= 0)
+			local d1=(output:get_value(4 .. "." .. (x-2)) ~= 0)
+			local d2=(output:get_value(4 .. "." .. (x-1)) ~= 0)
+			local d3=(output:get_value(4 .. "." .. (x-0)) ~= 0)
+			local d4=(output:get_value(5 .. "." .. (x-1)) ~= 0)
 			if (d2 and d4 and (d1 or d3)) then
 				return false
 			end
 		end
-	end 
-	return machine:outputs():get_value((y - 1) .. "." .. (x - 1)) ~= 0
+	end
+	return output:get_value((y - 1) .. "." .. (x - 1)) ~= 0
 end
 
 function interface.select_piece(x, y, event)

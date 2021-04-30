@@ -31,7 +31,7 @@ local scr = [[
 ]]
 
 local function describe_system()
-	return manager:machine():system().description .. " (" .. emu.app_name() .. " " .. emu.app_version() .. ")"
+	return manager.machine.system.description .. " (" .. emu.app_name() .. " " .. emu.app_version() .. ")"
 end
 
 local function board_reset()
@@ -88,14 +88,14 @@ local function promote_pawn(pos, piece, promotion)
 end
 
 local function send_input(tag, mask, seconds)
-	manager:machine():ioport().ports[tag]:field(mask):set_value(1)
+	manager.machine.ioport.ports[tag]:field(mask):set_value(1)
 	emu.wait(seconds * 2 / 3)
-	manager:machine():ioport().ports[tag]:field(mask):set_value(0)
+	manager.machine.ioport.ports[tag]:field(mask):set_value(0)
 	emu.wait(seconds * 1 / 3)
 end
 
 local function sb_set_ui(tag, mask, state)
-	local field = manager:machine():ioport().ports[tag .. ":UI"]:field(mask)
+	local field = manager.machine.ioport.ports[tag .. ":UI"]:field(mask)
 	if (field ~= nil) then
 		field:set_value(state)
 		emu.wait(0.5)
@@ -121,7 +121,7 @@ local function sb_promote(tag, x, y, piece)
 	end
 
 	send_input(tag .. ":SPAWN", mask, 0.09)
-	if (manager:machine():outputs():get_value("piece_ui0") ~= 0) then
+	if (manager.machine.output:get_value("piece_ui0") ~= 0) then
 		sb_set_ui(tag, 0x0002, 1)
 		send_input(tag .. ":RANK." .. tostring(y), 1 << (x - 1), 0.09)
 		sb_set_ui(tag, 0x0002, 0)
@@ -351,7 +351,7 @@ local function search_selected_piece()
 			end
 
 			if (new_type == nil) then
-				manager:machine():logerror(manager:machine():system().name .. " Unable to determine the promotion")
+				emu.print_verbose(manager.machine.system.name .. " Unable to determine the promotion")
 				new_type = "q"	-- default to Queen
 			end
 
@@ -398,7 +398,7 @@ local function send_options()
 				send_cmd('feature option="' .. tostring(opt[2])  .. ' -' .. tostring(opt[1]) .. ' ' .. opt_data .. '"')
 			end
 		else
-			manager:machine():logerror("Invalid interface options '" .. tostring(opt[1]) .. " " .. tostring(opt[2]) .. "'")
+			emu.print_verbose("Invalid interface options '" .. tostring(opt[1]) .. " " .. tostring(opt[2]) .. "'")
 		end
 	end
 end
@@ -410,10 +410,10 @@ local function set_option(name, value)
 
 	if (string.lower(name) == "speed") then
 		if (tonumber(value) == 0) then	-- 0 = unlimited
-			manager:machine():video().throttled = false
+			manager.machine.video.throttled = false
 		else
-			manager:machine():video().throttled = true
-			manager:machine():video().throttle_rate = tonumber(value) / 100.0
+			manager.machine.video.throttled = true
+			manager.machine.video.throttle_rate = tonumber(value) / 100.0
 		end
 	elseif (interface.set_option) then
 		interface.set_option(string.lower(name), value)
@@ -424,7 +424,7 @@ local function execute_uci_command(cmd)
 	if cmd:match("^position fen") ~= nil then
 		local m = cmd:find("moves")
 		if m ~= nil then
-                        cmd = "position startpos " .. cmd:sub(m)
+			cmd = "position startpos " .. cmd:sub(m)
 		end
 	end
 	if cmd == "uci" then
@@ -440,11 +440,11 @@ local function execute_uci_command(cmd)
 	elseif cmd == "ucinewgame" then
 		if game_started == true then
 			game_started = false
-			manager:machine():soft_reset()
+			manager.machine:soft_reset()
 		end
 		board_reset()
 	elseif cmd == "quit" then
-		manager:machine():exit()
+		manager.machine:exit()
 	elseif cmd:match("^go") ~= nil then
 		if board == nil then
 			board_reset()
@@ -493,7 +493,7 @@ local function execute_uci_command(cmd)
 			end
 		end
 	else
-		manager:machine():logerror("Unhandled UCI command '" .. cmd .. "'")
+		emu.print_verbose("Unhandled UCI command '" .. cmd .. "'")
 	end
 end
 
@@ -511,7 +511,7 @@ local function execute_xboard_command(cmd)
 	elseif cmd == "new" then
 		if game_started == true then
 			game_started = false
-			manager:machine():soft_reset()
+			manager.machine:soft_reset()
 		end
 		board_reset()
 	elseif cmd == "go" then
@@ -533,7 +533,7 @@ local function execute_xboard_command(cmd)
 			interface.start_play(not game_started)
 		end
 	elseif cmd == "quit" then
-		manager:machine():exit()
+		manager.machine:exit()
 	elseif cmd:match("^option ") ~= nil then
 		local opt_name, opt_val = string.match(cmd:sub(8), '([^=]+)=([^=]+)')
 		set_option(opt_name, opt_val)
@@ -547,7 +547,7 @@ local function execute_xboard_command(cmd)
 		piece_to = nil
 		sel_started = false
 	else
-		manager:machine():logerror("Unhandled xboard command '" .. cmd .. "'")
+		emu.print_verbose("Unhandled xboard command '" .. cmd .. "'")
 	end
 end
 
@@ -577,7 +577,8 @@ local function update()
 end
 
 local function load_interface(name)
-	local env = { machine = manager:machine(), send_input = send_input, get_piece_id = get_piece_id, get_move_type = get_move_type, load_interface = load_interface, emu = emu,
+	local env = { machine = manager.machine, send_input = send_input, get_piece_id = get_piece_id, get_move_type = get_move_type, emu = emu,
+			output = manager.machine.output, ioport = manager.machine.ioport, load_interface = load_interface,
 			sb_select_piece = sb_select_piece, sb_move_piece = sb_move_piece, sb_press_square = sb_press_square, sb_promote = sb_promote,
 			sb_remove_piece = sb_remove_piece, sb_reset_board = sb_reset_board, sb_rotate_board = sb_rotate_board, sb_set_ui = sb_set_ui,
 			pairs = pairs, ipairs = ipairs, tostring = tostring, tonumber = tonumber, string = string, math = math, print = _G.print }
@@ -599,7 +600,7 @@ function exports.startplugin()
 
 	emu.register_periodic(
 	function()
-		if ((co == nil or coroutine.status(co) == "dead") and not manager:machine().paused) then
+		if ((co == nil or coroutine.status(co) == "dead") and not manager.machine.paused) then
 			co = coroutine.create(update)
 			coroutine.resume(co)
 		end
@@ -607,12 +608,12 @@ function exports.startplugin()
 
 	emu.register_start(
 	function()
-		local system = manager:machine():system().name
+		local system = manager.machine.system.name
 		if interface == nil then
 			interface = load_interface(system)
 		end
-		if interface == nil and manager:machine():system().parent ~= nil then
-			interface = load_interface(manager:machine():system().parent)
+		if interface == nil and manager.machine.system.parent ~= nil then
+			interface = load_interface(manager.machine.system.parent)
 		end
 
 		if interface == nil then

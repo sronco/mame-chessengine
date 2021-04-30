@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -51,10 +53,10 @@ function interface.is_selected(x, y)
 	end
 	local xval = { 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71, 0x3d, 0x76 } -- A to H
 	local yval = { 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f } -- 1 to 8
-	local d0 = machine:outputs():get_value("digit0")
-	local d1 = machine:outputs():get_value("digit1")
-	local d2 = machine:outputs():get_value("digit2")
-	local d3 = machine:outputs():get_value("digit3")
+	local d0 = output:get_value("digit0")
+	local d1 = output:get_value("digit1")
+	local d2 = output:get_value("digit2")
+	local d3 = output:get_value("digit3")
 	if (d0 == 0x39 and d1 == 0x40 and d2 == 0x40 and d3 == 0x77) then -- "C--A", computer castles queenside
 		if ((x == 5 or x == 3) and (y == 8)) then
 			return true

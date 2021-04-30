@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("stratos")
 
 interface.invert = false
@@ -7,7 +9,7 @@ interface.cur_level = nil
 function interface.setup_machine()
 	sb_reset_board(":board")
 	interface.invert = false
-	if (machine:system().name == "coronaa") then
+	if (machine.system.name == "coronaa") then
 		emu.wait(5)
 	end
 	emu.wait(3)
@@ -23,7 +25,7 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	return machine:outputs():get_indexed_value(tostring(2 + x) .. ".", y - 1) ~= 0
+	return output:get_indexed_value(tostring(2 + x) .. ".", y - 1) ~= 0
 end
 
 function interface.get_options()

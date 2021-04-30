@@ -1,10 +1,12 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "NORMAL 0:10"
 interface.cur_level = nil
 interface.levelnum = 1
 
-function setdigits(n,r,s)
+local function setdigits(n,r,s)
 	local ddram = emu.item(machine.devices[':display:hd44780'].items['0/m_ddram'])
 	send_input(":KEY", 0x40, 0.25) -- ENT
 	for i=1,n do
@@ -82,7 +84,7 @@ function interface.setlevel()
 end
 
 function interface.setup_machine()
-	sb_reset_board(":board:board")
+	sb_reset_board(":board")
 	emu.wait(1.0)
 
 	interface.cur_level = ""
@@ -94,13 +96,13 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("led", (x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("led", 8 + (y - 1)) ~= 0
+	local xval = output:get_value((x - 1) .. ".0") ~= 0
+	local yval = output:get_value((y - 1) .. ".1") ~= 0
 	return xval and yval
 end
 
 function interface.select_piece(x, y, event)
-	sb_select_piece(":board:board", 1.5, x, y, event)
+	sb_select_piece(":board", 1.5, x, y, event)
 end
 
 function interface.get_options()
@@ -153,7 +155,7 @@ function interface.get_promotion(x, y)
 end
 
 function interface.promote(x, y, piece)
-	sb_promote(":board:board", x, y, piece)
+	sb_promote(":board", x, y, piece)
 	if     (piece == "q") then send_input(":KEY", 0x10, 1)
 	elseif (piece == "r") then send_input(":KEY", 0x08, 1)
 	elseif (piece == "b") then send_input(":KEY", 0x02, 1)

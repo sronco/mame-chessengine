@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -11,7 +13,7 @@ function interface.setlevel()
 	local lcd_num = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f }
 	repeat
 		send_input(":IN.0", 0x40, 0.5) -- Level
-	until machine:outputs():get_value("digit3") == lcd_num[interface.level + 1]
+	until output:get_value("digit3") == lcd_num[interface.level + 1]
 	send_input(":IN.0", 0x01, 1) -- Analysis
 end
 
@@ -29,8 +31,8 @@ function interface.start_play(init)
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("1.", x) ~= 0
-	local yval = machine:outputs():get_indexed_value("0.", y) ~= 0
+	local xval = output:get_indexed_value("1.", x) ~= 0
+	local yval = output:get_indexed_value("0.", y) ~= 0
 	return xval and yval
 end
 

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.invert = false
@@ -21,7 +23,7 @@ function interface.setup_machine()
 	interface.invert = false
 	emu.wait(9)
 	send_input(":IN.0", 0x20, 1)	-- NEW GAME
-	emu.wait(0.5)
+	emu.wait(1)
 
 	interface.cur_level = "a1"
 	interface.setlevel()
@@ -40,8 +42,8 @@ function interface.is_selected(x, y)
 		x = 9 - x
 		y = 9 - y
 	end
-	local xval = machine:outputs():get_value(tostring(x - 1) .. ".0") ~= 0
-	local yval = machine:outputs():get_value(tostring(y - 1) .. ".1") ~= 0
+	local xval = output:get_value(tostring(x - 1) .. ".0") ~= 0
+	local yval = output:get_value(tostring(y - 1) .. ".1") ~= 0
 	return xval and yval
 end
 
@@ -74,10 +76,10 @@ end
 
 function interface.get_promotion(x, y)
 	for i=0,5 do
-		if     (machine:outputs():get_value("9.1") ~= 0) then return 'q'
-		elseif (machine:outputs():get_value("9.2") ~= 0) then return 'r'
-		elseif (machine:outputs():get_value("8.0") ~= 0) then return 'b'
-		elseif (machine:outputs():get_value("8.1") ~= 0) then return 'n'
+		if     (output:get_value("9.1") ~= 0) then return 'q'
+		elseif (output:get_value("9.2") ~= 0) then return 'r'
+		elseif (output:get_value("8.0") ~= 0) then return 'b'
+		elseif (output:get_value("8.1") ~= 0) then return 'n'
 		end
 		emu.wait(0.2)
 	end

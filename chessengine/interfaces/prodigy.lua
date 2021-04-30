@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 0
@@ -8,7 +10,7 @@ function interface.setlevel()
 		return
 	end
 	interface.cur_level = interface.level
-	if (machine:outputs():get_value("digit0") ~= 0x38) then
+	if (output:get_value("digit0") ~= 0x38) then
 		send_input(":IN.0", 0x040, 1) -- LEVEL
 	end
 	interface.send_pos(interface.level)
@@ -24,6 +26,10 @@ function interface.setup_machine()
 end
 
 function interface.start_play(init)
+	if (output:get_value("digit0") == 0x38) then
+		send_input(":IN.0", 0x200, 1) -- ENTER
+	end
+
 	send_input(":IN.0", 0x001, 1) -- GO
 end
 
@@ -32,8 +38,8 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_value("4." .. tostring(x - 1)) ~= 0
-	local yval = machine:outputs():get_value("5." .. tostring(y - 1)) ~= 0
+	local xval = output:get_value("4." .. tostring(x - 1)) ~= 0
+	local yval = output:get_value("5." .. tostring(y - 1)) ~= 0
 	return xval and yval
 end
 

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = "a3"
@@ -47,7 +49,7 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	return machine:outputs():get_value((y + 3) .. "." .. (x - 1)) ~= 0
+	return output:get_value((y - 1) .. "." .. (x - 1)) ~= 0
 end
 
 function interface.send_pos(p)

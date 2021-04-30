@@ -1,6 +1,8 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
-local module = machine.images['cart']:filename()
+local module = machine.images[':cartslot'].filename
 interface.level = 1
 interface.cur_level = nil
 
@@ -12,7 +14,7 @@ function interface.setlevel()
 	local level = interface.level
 	repeat
 		send_input(":IN.0", 0x08, 0.6) -- LV
-	until machine:outputs():get_indexed_value("0.", tostring(level-1)) ~= 0
+	until output:get_indexed_value("0.", tostring(level-1)) ~= 0
 	send_input(":IN.0", 0x40, 0.6) -- CL
 end
 
@@ -36,8 +38,8 @@ function interface.stop_play()
 end
 
 function interface.is_selected(x, y)
-	local xval = machine:outputs():get_indexed_value("1.", tostring(x - 1)) ~= 0
-	local yval = machine:outputs():get_indexed_value("0.", tostring(y - 1)) ~= 0
+	local xval = output:get_indexed_value("1.", tostring(x - 1)) ~= 0
+	local yval = output:get_indexed_value("0.", tostring(y - 1)) ~= 0
 	return xval and yval
 end
 

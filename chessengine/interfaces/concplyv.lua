@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("concply")
 
 function interface.select_piece(x, y, event)

@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -20,7 +22,7 @@ function interface.setlevel()
 	send_input(":IN.4", 0x08, 0.25) -- CE
 	local mode = 1
 	for i=2,4 do
-		if (machine:outputs():get_value("0.7." .. tostring(12-i)) ~= 0x00) then
+		if (output:get_value("0.7." .. tostring(12-i)) ~= 0x00) then
 			mode = i
 			break
 		end
@@ -75,7 +77,7 @@ function interface.start_play(init)
 	interface.turn = false
 	send_input(":IN.4", 0x02, 1) -- Go
 end
-	
+
 function interface.stop_play()
 	if (not interface.turn) then
 		send_input(":IN.4", 0x02, 0.5) -- Go
@@ -84,13 +86,17 @@ function interface.stop_play()
 		emu.wait(0.5)
 	end
 end
-	
+
 function interface.is_selected(x, y)
 	if (x == 1 and y == 1) then
---		computing = (emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read(0x3de4) ~= 0x00) -- COMPUTING?
-		computing = (machine:outputs():get_value("0.7.11") ~= 0x00) -- COMPUTING?
+--		computing = (machine.devices[':maincpu'].spaces['program']:read_u8(0x3de4) ~= 0x00) -- COMPUTING?
+		computing = (output:get_value("0.7.11") ~= 0x00) -- COMPUTING?
 		if (not computing) then
-			ddram = emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read_block(0x3e70, 0x10)
+			local ram = machine.devices[':maincpu'].spaces['program']:read_range(0x3e70, 0x3e80, 8)
+			ddram = {}
+			for i=1,16 do
+				ddram[i] = string.byte(string.sub(ram, i))
+			end
 		end
 	end
 	if (computing) then
@@ -100,11 +106,11 @@ function interface.is_selected(x, y)
 	local yval = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 }
 	local d0, d1, d2, d3, d4
 	if (interface.color == "B") then
-		d0 = ddram:byte(7)
-		d1 = ddram:byte(8)
-		d2 = ddram:byte(9)
-		d3 = ddram:byte(10)
-		d4 = ddram:byte(11)
+		d0 = ddram[7]
+		d1 = ddram[8]
+		d2 = ddram[9]
+		d3 = ddram[10]
+		d4 = ddram[11]
 		if (d0 == 0x4f and d1 == 0x2d and d2 == 0x4f and d3 == 0x2d) then -- "0-0-", computer castles queenside
 			if ((x == 5 or x == 3) and (y == 8)) then
 				return true
@@ -120,11 +126,11 @@ function interface.is_selected(x, y)
 			end
 		end
 	else
-		d0 = ddram:byte(4)
-		d1 = ddram:byte(5)
-		d2 = ddram:byte(6)
-		d3 = ddram:byte(7)
-		d4 = ddram:byte(8)
+		d0 = ddram[4]
+		d1 = ddram[5]
+		d2 = ddram[6]
+		d3 = ddram[7]
+		d4 = ddram[8]
 		if (d0 == 0x4f and d1 == 0x2d and d2 == 0x4f and d3 == 0x2d) then -- "0-0-", computer castles queenside
 			if ((x == 5 or x == 3) and (y == 1)) then
 				return true
@@ -139,7 +145,7 @@ function interface.is_selected(x, y)
 				return false
 			end
 		end
-	end 
+	end
 	return (xval[x] == d0 and yval[y] == d1) or (xval[x] == d3 and yval[y] == d4)
 end
 
@@ -178,7 +184,7 @@ end
 function interface.set_option(name, value)
 	if (name == "level") then
 		interface.levelnum = 0
-		local level = string.upper(value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ")) -- trim 
+		local level = string.upper(value:match("^%s*(.-)%s*$"):gsub("%s%s+"," ")) -- trim
 		local n = tonumber(level)
 		if (n ~= nil and n >= 0 and n <= 999) then
 			interface.levelnum = 1
@@ -203,12 +209,11 @@ function interface.set_option(name, value)
 end
 
 function interface.get_promotion(x, y)
-	local ddram = emu.item(machine.devices[':maincpu'].items['0/00000000-0000ffff']):read_block(0x3e70, 0x10)
 	local p
 	if (interface.color == "B") then
-		p = ddram:byte(12) -- piece for black promotion
+		p = machine.devices[':maincpu'].spaces['program']:read_u8(0x3e70 + 12) -- piece for black promotion
 	else
-		p = ddram:byte(9)  -- piece for white promotion
+		p = machine.devices[':maincpu'].spaces['program']:read_u8(0x3e70 + 9)  -- piece for white promotion
 	end
 
 	if (p == 0x51) then return 'q'

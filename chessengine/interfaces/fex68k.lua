@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.opt_clear_announcements = true
@@ -35,10 +37,10 @@ function interface.start_play(init)
 end
 
 function interface.clear_announcements()
-	local d0 = machine:outputs():get_value("digit0")
-	local d2 = machine:outputs():get_value("digit2")
-	local d4 = machine:outputs():get_value("digit4")
-	local d6 = machine:outputs():get_value("digit6")
+	local d0 = output:get_value("digit0")
+	local d2 = output:get_value("digit2")
+	local d4 = output:get_value("digit4")
+	local d6 = output:get_value("digit6")
 
 	-- clear announcements to continue the game
 	if ((d4 == 0x37 and d2 == 0x00) or					--  'M ' forced checkmate found in X moves
@@ -56,7 +58,7 @@ function interface.is_selected(x, y)
 	-- the first line of LEDs is also used for announcements, so we need to be sure that the LED does not flash
 	if (y == 1) then
 		for i=1,5 do
-			if (machine:outputs():get_indexed_value(tostring(x - 1) .. ".", 7 + y) == 0) then
+			if (output:get_indexed_value(tostring(x - 1) .. ".", 7 + y) == 0) then
 				return false
 			end
 			emu.wait(0.15)
@@ -64,7 +66,7 @@ function interface.is_selected(x, y)
 
 		return true
 	else
-		return machine:outputs():get_indexed_value(tostring(x - 1) .. ".", 7 + y) ~= 0
+		return output:get_indexed_value(tostring(x - 1) .. ".", 7 + y) ~= 0
 	end
 end
 

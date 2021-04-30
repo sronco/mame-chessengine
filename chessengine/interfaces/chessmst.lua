@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.level = 1
@@ -31,7 +33,7 @@ end
 
 function interface.is_selected(x, y)
 	local led_tag = { "a", "b", "c", "d", "e", "f", "g", "h" }
-	return machine:outputs():get_indexed_value("led_" .. led_tag[x], 9 - y) == 0
+	return output:get_indexed_value("led_" .. led_tag[x], 9 - y) == 0
 end
 
 function interface.select_piece(x, y, event)

@@ -1,5 +1,4 @@
 -- license:BSD-3-Clause
--- copyright-holders:Sandro Ronco
 
 interface = {}
 
@@ -18,7 +17,7 @@ function interface.setlevel()
 	local dif_level
 	send_input(":IN.0", 0x10, 0.5) -- LEVEL
 	for y=0,7 do
-		if machine:outputs():get_indexed_value("0.", y) ~= 0 then
+		if output:get_indexed_value("0.", y) ~= 0 then
 			cur_leds = cur_leds + (1 << y)
 		end
 	end
@@ -52,10 +51,10 @@ end
 
 function interface.clear_announcements()
 	-- clear announcements to continue the game
-	local lastval2 = machine:outputs():get_value("1.2")
-	local lastval6 = machine:outputs():get_value("1.6")
+	local lastval2 = output:get_value("1.2")
+	local lastval6 = output:get_value("1.6")
 	emu.wait(0.3)
-	if (lastval2 ~= machine:outputs():get_value("1.2") or lastval6 ~= machine:outputs():get_value("1.6")) then
+	if (lastval2 ~= output:get_value("1.2") or lastval6 ~= output:get_value("1.6")) then
 		send_input(":IN.0", 0x01, 1)
 		emu.wait(1)
 	end
@@ -64,7 +63,7 @@ end
 function interface.is_led_on(tag, idx)
 	-- returns false if the LED is off or flashing
 	for i=1,4 do
-		if (machine:outputs():get_indexed_value(tag, idx) == 0) then
+		if (output:get_indexed_value(tag, idx) == 0) then
 			return false
 		end
 		emu.wait(0.15)
@@ -78,7 +77,7 @@ function interface.is_selected(x, y)
 		interface.clear_announcements()
 	end
 
-	return machine:outputs():get_indexed_value("0.", y - 1) ~= 0 and interface.is_led_on("1.", x - 1)
+	return output:get_indexed_value("0.", y - 1) ~= 0 and interface.is_led_on("1.", x - 1)
 end
 
 function interface.select_piece(x, y, event)

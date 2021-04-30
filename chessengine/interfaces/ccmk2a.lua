@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = load_interface("ccmk2")
 
 function interface.send_pos2(p)  -- "1" to "8" keys

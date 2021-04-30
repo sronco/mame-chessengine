@@ -1,3 +1,5 @@
+-- license:BSD-3-Clause
+
 interface = {}
 
 interface.turn = true
@@ -14,9 +16,9 @@ function interface.setlevel()
 	end
 	interface.cur_level = interface.level
 	repeat
-		local lev2 = machine:outputs():get_value("1.2.20")
-		local lev3 = machine:outputs():get_value("1.3.20")
-		local lev4 = machine:outputs():get_value("1.7.20")
+		local lev2 = output:get_value("1.2.20")
+		local lev3 = output:get_value("1.3.20")
+		local lev4 = output:get_value("1.7.20")
 		if (1 + lev2 + lev3 + lev4 ~= interface.level) then
 			send_input(":IN.0", 0x10, 0.2) -- LEVEL
 		end
@@ -45,8 +47,11 @@ function interface.setup_machine()
 end
 
 function interface.start_play(init)
-	send_input(":IN.1", 0x02, 1) -- MOVE
 	interface.turn = false
+	send_input(":IN.1", 0x02, 1) -- MOVE
+end
+
+function interface.stop_play()
 end
 
 function interface.is_pos_selected(x, y, piece)
@@ -94,10 +99,10 @@ function interface.is_selected(x, y)
 		xtag =  { 3, 2, 1, 0, 7, 6, 5, 4 }
 	end
 
-	local piece0 = machine:outputs():get_value(ytag .. "." .. xtag[x] .. "." .. tostring(19 - ((y - 1) & 3) * 5))
-	local piece1 = machine:outputs():get_value(ytag .. "." .. xtag[x] .. "." .. tostring(16 - ((y - 1) & 3) * 5))
-	local piece2 = machine:outputs():get_value(ytag .. "." .. xtag[x] .. "." .. tostring(18 - ((y - 1) & 3) * 5))
-	local piece3 = machine:outputs():get_value(ytag .. "." .. xtag[x] .. "." .. tostring(15 - ((y - 1) & 3) * 5))
+	local piece0 = output:get_value(ytag .. "." .. xtag[x] .. "." .. tostring(19 - ((y - 1) & 3) * 5))
+	local piece1 = output:get_value(ytag .. "." .. xtag[x] .. "." .. tostring(16 - ((y - 1) & 3) * 5))
+	local piece2 = output:get_value(ytag .. "." .. xtag[x] .. "." .. tostring(18 - ((y - 1) & 3) * 5))
+	local piece3 = output:get_value(ytag .. "." .. xtag[x] .. "." .. tostring(15 - ((y - 1) & 3) * 5))
 
 	local piece = 0
 	if ((piece0 + piece1) ~= 0 and (piece2 + piece3) ~= 0) then	piece = -1
@@ -160,7 +165,7 @@ end
 function interface.set_option(name, value)
 	if (name == "level") then
 		local level = tonumber(value)
-		if (level < 0 or level > 9) then
+		if (level < 1 or level > 4) then
 			return
 		end
 		interface.level = level
